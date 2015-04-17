@@ -5,7 +5,8 @@ SOURCES  += dbdirection.cpp\
     $$PWD/fordelete.cpp \
     $$PWD/viewlisttable.cpp \
     $$PWD/searchform.cpp \
-    $$PWD/registrationform.cpp
+    $$PWD/registrationform.cpp \
+    $$PWD/update.cpp
 
 HEADERS  += dbdirection.h\
             lineedit.h \
@@ -14,4 +15,5 @@ HEADERS  += dbdirection.h\
     $$PWD/fordelete.h \
     $$PWD/viewlisttable.h \
     $$PWD/searchform.h \
-    $$PWD/registrationform.h
+    $$PWD/registrationform.h \
+    $$PWD/update.h
