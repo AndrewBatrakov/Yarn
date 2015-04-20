@@ -409,9 +409,9 @@ void MainWindow::createContextMenu()
 }
 void MainWindow::aboutProgramm()
 {
-    //QSettings iniSettings("EmployeeClient.ini",QSettings::IniFormat);
-    //QString version = iniSettings.value("Version").toString();
-    //    int fontId = iniSettings.value("Font").toInt();
+    QSettings iniSettings("Yarn.ini",QSettings::IniFormat);
+    QString version = iniSettings.value("Version").toString();
+   //    int fontId = iniSettings.value("Font").toInt();
 
     QMessageBox msgBox(this);
     msgBox.setWindowTitle(tr("Yarn"));
@@ -422,7 +422,7 @@ void MainWindow::aboutProgramm()
                              "style=\"font: bold\" >"
                              "Yarn "
                              "<br/> (SQLite version) ");
-    //textMessage += version;
+    textMessage += version;
     textMessage += tr("</p>"
                       "<p style=\"color:darkgreen\"; style=\"font-family:Times New Roman\"; "
                       "style=\"font-size :12pt\">Copyright 2011-15 A+O Batrakov Inc.</p>"

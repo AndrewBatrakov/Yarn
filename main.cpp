@@ -2,10 +2,14 @@
 #include <QApplication>
 
 #include "registrationform.h"
+#include "update.h"
 
 int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
+
+    Update update;
+    update.iniVersion();
 
     QTranslator translator;
     if(translator.load("Yarn_ru.qm"))

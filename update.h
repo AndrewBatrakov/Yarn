@@ -19,7 +19,6 @@ private slots:
     void exeVersion();
     void tranceVersion();
 
-    void cancelDownLoadIni();
     void cancelDownLoadExe();
     void cancelDownLoadTrance();
 
@@ -37,6 +36,10 @@ private slots:
     void httpReadyReadIni();
     void httpReadyReadExe();
     void httpReadyReadTrance();
+
+//#ifndef QT_NO_SSL
+//    void sslErrors(QNetworkReply*,const QList<QSslError> &errors);
+//#endif
 
 private:
     QUrl url;
