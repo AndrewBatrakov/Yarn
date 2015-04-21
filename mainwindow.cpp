@@ -3,6 +3,7 @@
 #include "materialform.h"
 #include "structureform.h"
 #include "yarnform.h"
+#include "putbase.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -329,14 +330,14 @@ void MainWindow::createActions()
     //Reports Action
 
     //Service Action
-    /*prefixAction = new QAction(tr("Prefix..."),this);
-    connect(prefixAction,SIGNAL(triggered()),this,SLOT(prefixFunction()));
+    //prefixAction = new QAction(tr("Prefix..."),this);
+    //connect(prefixAction,SIGNAL(triggered()),this,SLOT(prefixFunction()));
 
     putAction = new QAction(tr("Put Base on FTP"),this);
     connect(putAction,SIGNAL(triggered()),this,SLOT(putBaseProcedure()));
 
     getAction = new QAction(tr("Get Base from FTP"),this);
-    connect(getAction,SIGNAL(triggered()),this,SLOT(getBaseProcedure()));*/
+    connect(getAction,SIGNAL(triggered()),this,SLOT(getBaseProcedure()));
 
     //Help Action
     aboutQtAction = new QAction(tr("About Qt..."),this);
@@ -358,17 +359,17 @@ void MainWindow::createMenu()
     referenceMenu->addAction(materialAction);
     referenceMenu->addAction(colorAction);
 
-    /*documentMenu = menuBar()->addMenu(tr("Documents"));
-    documentMenu->addSeparator();
+    //documentMenu = menuBar()->addMenu(tr("Documents"));
+    //documentMenu->addSeparator();
 
-    reportMenu = menuBar()->addMenu(tr("Reports"));
-    reportMenu->addSeparator();
+    //reportMenu = menuBar()->addMenu(tr("Reports"));
+    //reportMenu->addSeparator();
 
     serviceMenu = menuBar()->addMenu(tr("Service"));
-    serviceMenu->addAction(prefixAction);
+    //serviceMenu->addAction(prefixAction);
     serviceMenu->addAction(putAction);
     serviceMenu->addAction(getAction);
-    serviceMenu->addSeparator();*/
+    serviceMenu->addSeparator();
 
     menuBar()->addSeparator();
     helpMenu = menuBar()->addMenu(tr("Help"));
@@ -681,4 +682,15 @@ void MainWindow::viewStructure()
 void MainWindow::viewYarn()
 {
     viewTemplateTable("yarn");
+}
+
+void MainWindow::putBaseProcedure()
+{
+    PutBase put(this);
+    put.putBase();
+}
+
+void MainWindow::getBaseProcedure()
+{
+
 }

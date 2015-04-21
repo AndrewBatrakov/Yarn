@@ -6,7 +6,9 @@ SOURCES  += dbdirection.cpp\
     $$PWD/viewlisttable.cpp \
     $$PWD/searchform.cpp \
     $$PWD/registrationform.cpp \
-    $$PWD/update.cpp
+    $$PWD/update.cpp \
+    $$PWD/getbase.cpp \
+    $$PWD/putbase.cpp
 
 HEADERS  += dbdirection.h\
             lineedit.h \
@@ -16,4 +18,6 @@ HEADERS  += dbdirection.h\
     $$PWD/viewlisttable.h \
     $$PWD/searchform.h \
     $$PWD/registrationform.h \
-    $$PWD/update.h
+    $$PWD/update.h \
+    $$PWD/getbase.h \
+    $$PWD/putbase.h

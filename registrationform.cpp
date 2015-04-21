@@ -1,5 +1,6 @@
 #include "registrationform.h"
 #include "dbdirection.h"
+#include "getbase.h"
 
 RegistrationForm::RegistrationForm(QWidget *parent) : QDialog(parent)
 {
@@ -27,6 +28,8 @@ bool RegistrationForm::checkFile()
                                             "Upload from Server?"),
                                          QMessageBox::Yes,QMessageBox::No);
         if(quest == QMessageBox::Yes){
+            GetBase getBase(this);
+            getBase.getBaseHttp();
             return true;
         }else{
             return false;

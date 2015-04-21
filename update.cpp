@@ -256,8 +256,6 @@ bool Update::newVersion()
     QSettings settings("YarnFromSite.ini",QSettings::IniFormat);
     QString siteVersion = settings.value("Version").toString();
 
-    qDebug()<<siteVersion;
-
     QSettings nowSettings("Yarn.ini",QSettings::IniFormat);
     nowVersion = nowSettings.value("Version").toString();
 

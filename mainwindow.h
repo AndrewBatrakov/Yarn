@@ -35,6 +35,8 @@ private slots:
     void viewStructure();
     void viewYarn();
 
+    void putBaseProcedure();
+    void getBaseProcedure();
 private:
     QWidget *panel;
     QSplitter *splitter;
@@ -68,12 +70,12 @@ private:
 
     //QMenu *reportMenu;
 
-    //QMenu *serviceMenu;
+    QMenu *serviceMenu;
     //QAction *ademantAction;
     //QAction *ftpAction;
     //QAction *searchAction;
-    //QAction *putAction;
-    //QAction *getAction;
+    QAction *putAction;
+    QAction *getAction;
     //QAction *vaccumAction;
 
     QMenu *helpMenu;
