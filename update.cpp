@@ -227,9 +227,6 @@ Update::Update(QWidget *parent) : QDialog(parent)
                            "color: #00cc00;}"
                            );
     url = "http://91.102.219.74/QtProject/Yarn/Yarn.ini";
-//    replyIni->ignoreSslErrors();
-//    replyExe->ignoreSslErrors();
-//    replyTrance->ignoreSslErrors();
 }
 
 void Update::iniVersion()
@@ -249,10 +246,6 @@ void Update::iniVersion()
             connect(replyIni,SIGNAL(finished()),this,SLOT(httpDoneIni()));
             connect(replyIni,SIGNAL(readyRead()),this,SLOT(httpReadyReadIni()));
 
-//#ifndef QT_NO_SSL
-//            connect(replyIni, SIGNAL(sslErrors(QNetworkReply*,QList<QSslError>)),
-//                    this, SLOT(sslErrors(QNetworkReply*,QList<QSslError>)));
-//#endif
         }
     }
 }
@@ -330,7 +323,6 @@ void Update::tranceVersion()
     connect(replyTrance,SIGNAL(readyRead()),this,SLOT(httpReadyReadTrance()));
     connect(replyTrance,SIGNAL(uploadProgress(qint64,qint64)),this,SLOT(updateDataReadProgressTrance(qint64,qint64)));
     connect(replyTrance,SIGNAL(downloadProgress(qint64,qint64)),this,SLOT(updateDataReadProgressTrance(qint64,qint64)));
-
 
     progressDialogTrance->setLabelText(tr("Downloading Yarn translation ..."));
     progressDialogTrance->setEnabled(true);
@@ -417,21 +409,3 @@ void Update::httpReadyReadTrance()
         fileHttpTrance->write(replyTrance->readAll());
     progressDialogTrance->hide();
 }
-
-//#ifndef QT_NO_SSL
-//void Update::sslErrors(QNetworkReply*,const QList<QSslError> &errors)
-//{
-//    QString errorString;
-//    foreach (const QSslError &error, errors) {
-//        if (!errorString.isEmpty())
-//            errorString += ", ";
-//        errorString += error.errorString();
-//    }
-
-//    if (QMessageBox::warning(this, tr("HTTP"),
-//                             tr("One or more SSL errors has occurred: %1").arg(errorString),
-//                             QMessageBox::Ignore | QMessageBox::Abort) == QMessageBox::Ignore) {
-//        replyIni->ignoreSslErrors();
-//    }
-//}
-//#endif
