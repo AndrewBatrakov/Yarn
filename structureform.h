@@ -4,6 +4,7 @@
 #include <QtWidgets>
 #include <QtSql>
 #include "lineedit.h"
+#include "photolabel.h"
 
 class StructureForm : public QDialog
 {
@@ -20,6 +21,9 @@ public slots:
 private slots:
     void editRecord();
 
+    void saveRecord();
+    void cancelRecord();
+
     void addRecordOfTable();
     void deleteRecordOfTable();
     void editRecordOfTable();
@@ -27,10 +31,13 @@ private slots:
     void readSettings();
     void writeSettings();
 
+    void photoRead();
+
 private:
 
     QLabel *labelStructure;
     LineEdit *editStructure;
+    PhotoLabel *labelPhoto;
 
     QPushButton *saveButton;
     QPushButton *cancelButton;

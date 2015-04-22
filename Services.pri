@@ -8,7 +8,8 @@ SOURCES  += dbdirection.cpp\
     $$PWD/registrationform.cpp \
     $$PWD/update.cpp \
     $$PWD/getbase.cpp \
-    $$PWD/putbase.cpp
+    $$PWD/putbase.cpp \
+    $$PWD/photolabel.cpp
 
 HEADERS  += dbdirection.h\
             lineedit.h \
@@ -20,4 +21,5 @@ HEADERS  += dbdirection.h\
     $$PWD/registrationform.h \
     $$PWD/update.h \
     $$PWD/getbase.h \
-    $$PWD/putbase.h
+    $$PWD/putbase.h \
+    $$PWD/photolabel.h
