@@ -28,3 +28,5 @@ RESOURCES += \
     resource.qrc
 
 RC_FILE = Yarn.rc
+
+DISTFILES +=

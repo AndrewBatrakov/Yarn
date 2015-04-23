@@ -3,6 +3,7 @@
 
 #include <QtWidgets>
 #include "lineedit.h"
+#include "photolabel.h"
 
 class YarnForm : public QDialog
 {
@@ -20,10 +21,33 @@ private slots:
     void readSettings();
     void writeSettings();
 
+    void addColorRecord();
+    void seeColorRecord();
+    void listColorRecord();
+    void addStructureRecord();
+    void seeStructureRecord();
+    void listStructureRecord();
+    void addFirmaRecord();
+    void seeFirmaRecord();
+    void listFirmaRecord();
+
 private:
 
-    QLabel *labelForm;
-    LineEdit *editForm;
+    QLabel *labelName;
+    LineEdit *editName;
+    QLabel *labelColor;
+    LineEdit *editColor;
+    QLabel *labelLenght;
+    LineEdit *editLenght;
+    QLabel *labelWeight;
+    LineEdit *editWeight;
+    QLabel *labelStructure;
+    LineEdit *editStructure;
+    QLabel *labelFirma;
+    LineEdit *editFirma;
+    QLabel *labelThickness;
+    LineEdit *editThickness;
+    PhotoLabel *photoLabel;
 
     QPushButton *saveButton;
     QPushButton *cancelButton;

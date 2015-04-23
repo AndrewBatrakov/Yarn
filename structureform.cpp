@@ -1,6 +1,7 @@
 #include "structureform.h"
 #include "numprefix.h"
 #include "viewlisttable.h"
+#include "materialform.h"
 
 StructureForm::StructureForm(QString id,QWidget *parent, bool onlyForRead) : QDialog(parent)
 {
@@ -32,7 +33,7 @@ StructureForm::StructureForm(QString id,QWidget *parent, bool onlyForRead) : QDi
     labelStructure->setBuddy(editStructure);
 
     saveButton = new QPushButton(tr("Save"));
-    connect(saveButton,SIGNAL(clicked()),this,SLOT(editRecord()));
+    connect(saveButton,SIGNAL(clicked()),this,SLOT(saveRecord()));
     saveButton->setToolTip(tr("Save And Close Button"));
 
     cancelButton = new QPushButton(tr("Cancel"));
@@ -64,6 +65,7 @@ StructureForm::StructureForm(QString id,QWidget *parent, bool onlyForRead) : QDi
     tableWidget = new QTableWidget(0,3);
     tableWidget->setHorizontalHeaderLabels(QStringList()<<tr("Material Name")<<tr("Persent"));
     QHeaderView *head = tableWidget->horizontalHeader();
+    connect(head,SIGNAL(sectionClicked(int)),this,SLOT(sortTable(int)));
     tableWidget->setSelectionMode(QAbstractItemView::SingleSelection);
     tableWidget->setSelectionBehavior(QAbstractItemView::SelectRows);
     tableWidget->setEditTriggers(QAbstractItemView::NoEditTriggers);
@@ -96,39 +98,43 @@ StructureForm::StructureForm(QString id,QWidget *parent, bool onlyForRead) : QDi
             editStructure->setText(query.value(1).toString());
 
             QSqlQuery queryTable;
-            queryTable.prepare("SELECT * FROM structuretable WHERE structureid = :idt;");
-            queryTable.bindValue(":idt",indexTemp);
+            queryTable.prepare("SELECT * FROM structuretable WHERE structureid = :id");
+            queryTable.bindValue(":id",indexTemp);
             queryTable.exec();
-            if(!queryTable.isActive()){
-                QMessageBox::warning(this,QObject::tr("Structure Table, SELECT Table ERROR!"),queryTable.lastError().text());
-            }
-
             int row = 0;
             while(queryTable.next()){
-
                 QSqlQuery queryName;
-                queryName.prepare("SELECT * FROM material WHERE materialid = :id);");
+                queryName.prepare("SELECT * FROM material WHERE materialid = :id");
                 queryName.bindValue(":id",queryTable.value(2).toString());
                 queryName.exec();
-                if(!queryName.isActive()){
-                    QMessageBox::warning(this,QObject::tr("Structure Table, SELECT Material ERROR!"),queryName.lastError().text());
-                    return;
-                }
                 while(queryName.next()){
                     tableWidget->insertRow(row);
                     QTableWidgetItem *item = new QTableWidgetItem;
                     tableWidget->setItem(row,0,item);
-                    tableWidget->item(row,0)->setText(queryName.value(0).toString());
-
-                    QTableWidgetItem *item1 = new QTableWidgetItem;
-                    tableWidget->setItem(row,0,item1);
                     tableWidget->item(row,0)->setText(queryName.value(1).toString());
 
+                    QTableWidgetItem *item1 = new QTableWidgetItem;
+                    tableWidget->setItem(row,1,item1);
+                    tableWidget->item(row,1)->setText(queryName.value(2).toString());
+
                     QTableWidgetItem *item2 = new QTableWidgetItem;
-                    tableWidget->setItem(row,0,item2);
-                    tableWidget->item(row,0)->setText(queryName.value(2).toString());
+                    tableWidget->setItem(row,2,item2);
+                    tableWidget->item(row,2)->setText(queryName.value(0).toString());
                     ++row;
                 }
+            }
+            QSqlQuery queryPhoto;
+            queryPhoto.prepare("SELECT photoname FROM photo WHERE photoid = :id");
+            queryPhoto.bindValue(":id",indexTemp);
+            queryPhoto.exec();
+            while(queryPhoto.next()){
+                QByteArray imageByte = queryPhoto.value(0).toByteArray();
+                QImage pixMap;
+                pixMap.loadFromData(imageByte);
+                QImage re = pixMap.scaled(100,200,Qt::KeepAspectRatio,Qt::SmoothTransformation);
+                labelPhoto->setPixmap(QPixmap::fromImage(re));
+                QSettings settings("AO_Batrakov_Inc.", "Yarn");
+                settings.setValue("indexPhoto",indexTemp);
             }
         }
     }else{
@@ -151,22 +157,56 @@ StructureForm::StructureForm(QString id,QWidget *parent, bool onlyForRead) : QDi
 
 void StructureForm::editRecord()
 {
-
+    QSqlQuery query;
+    query.prepare("SELECT * FROM structure WHERE structureid = :id");
+    query.bindValue(":id",indexTemp);
+    query.exec();
+    query.next();
+    if(query.isValid()){
+        QSqlQuery queryU;
+        queryU.prepare("UPDATE structure SET "
+                       "strucrurename = :name "
+                       "WHERE structureid = :id");
+        queryU.bindValue(":name",editStructure->text().simplified());
+        queryU.bindValue(":id",indexTemp);
+        queryU.exec();
+        qDebug()<<queryU.lastError().text();
+    }else{
+        QSqlQuery queryI;
+        queryI.prepare("INSERT INTO structure ("
+                       "structurename, structureid) VALUES (:name, "
+                       ":id)");
+        queryI.bindValue(":name",editStructure->text().simplified());
+        queryI.bindValue(":id",indexTemp);
+        queryI.exec();
+        qDebug()<<queryI.lastError().text();
+    }
 }
 
 void StructureForm::deleteRecord()
 {
-
+    QSqlQuery query;
+    query.prepare("DELETE FROM structure WHERE structureid = :id");
+    query.bindValue(":id",indexTemp);
+    query.exec();
 }
 
 void StructureForm::saveRecord()
 {
-
+    editRecord();
+    emit accept();
 }
 
 void StructureForm::cancelRecord()
 {
-
+    for(int row; row < tableWidget->rowCount(); ++row){
+        QSqlQuery query;
+        query.prepare("DELETE FROM structuretable WHERE structuretableid = :id");
+        query.bindValue(":id",tableWidget->item(row,2)->text());
+        query.exec();
+    }
+    indexTemp = "";
+    emit accept();
 }
 
 void StructureForm::done(int result)
@@ -254,7 +294,31 @@ void StructureForm::deleteRecordOfTable()
 
 void StructureForm::editRecordOfTable()
 {
+    int rowNow = tableWidget->currentRow();
+    MaterialForm materialForm(tableWidget->item(rowNow,2)->text(),this,false);
+    materialForm.exec();
+    QString materialID = materialForm.rowOut();
 
+    QSqlQuery query;
+    query.prepare("SELECT * FROM material WHERE materialid = :id");
+    query.bindValue(":id",materialID);
+    query.exec();
+    while(query.next()){
+        //tableWidget->insertRow(row);
+        QTableWidgetItem *item1 = new QTableWidgetItem;
+        tableWidget->setItem(rowNow,0,item1);
+        tableWidget->item(rowNow,0)->setText(query.value(1).toString());
+
+        QTableWidgetItem *item2 = new QTableWidgetItem;
+        tableWidget->setItem(rowNow,1,item2);
+        tableWidget->item(rowNow,1)->setText(query.value(2).toString());
+
+        QTableWidgetItem *item3 = new QTableWidgetItem;
+        tableWidget->setItem(rowNow,2,item3);
+        tableWidget->item(rowNow,2)->setText(query.value(0).toString());
+        tableWidget->setColumnHidden(2,true);
+        tableWidget->repaint();
+    }
 }
 
 void StructureForm::readSettings()
@@ -267,6 +331,7 @@ void StructureForm::writeSettings()
 {
     QSettings settings("AO_Batrakov_Inc.", "Yarn");
     settings.setValue("Structure", saveGeometry());
+    settings.remove("indexPhoto");
 }
 
 void StructureForm::photoRead()
@@ -310,4 +375,14 @@ void StructureForm::photoRead()
             queryPhoto.exec();
         }
     }
+}
+
+void StructureForm::sortTable(int index)
+{
+//    templateModel->setSort(index,Qt::AscendingOrder);
+//    templateModel->select();
+    //while(templateModel->canFetchMore())
+    //    templateModel->fetchMore();
+    tableWidget->setSortingEnabled(true);
+    tableWidget->sortByColumn(index,Qt::AscendingOrder);
 }

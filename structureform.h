@@ -32,6 +32,7 @@ private slots:
     void writeSettings();
 
     void photoRead();
+    void sortTable(int);
 
 private:
 

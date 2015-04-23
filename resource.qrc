@@ -5,5 +5,7 @@
         <file>edit.png</file>
         <file>fileclose.png</file>
         <file>logo.png</file>
+        <file>list.png</file>
+        <file>see.png</file>
     </qresource>
 </RCC>
