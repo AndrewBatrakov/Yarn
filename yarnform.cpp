@@ -50,6 +50,7 @@ YarnForm::YarnForm(QString iD, QWidget *parent, bool onlyForRead) : QDialog(pare
                               "stop:1 #585c5f);"
                               "color: #00cc00;"
                               "font: bold;}");
+    connect(photoLabel,SIGNAL(clicked()),this,SLOT(photoRead()));
 
     labelName = new QLabel(tr("Name:"));
     editName = new LineEdit;
@@ -203,6 +204,35 @@ YarnForm::YarnForm(QString iD, QWidget *parent, bool onlyForRead) : QDialog(pare
         editName->selectAll();
     }
 
+    if(indexTemp != ""){
+        QSqlQuery query;
+        query.prepare("SELECT * FROM yarn WHERE yarnid = ?");
+        query.addBindValue(indexTemp);
+        query.exec();
+        while(query.next()){
+            editName->setText(query.value(1).toString());
+            editColor->setText(query.value(2).toString());
+            editLenght->setText(query.value(3).toString());
+            editWeight->setText(query.value(4).toString());
+            editStructure->setText(query.value(5).toString());
+            editFirma->setText(query.value(6).toString());
+            editThickness->setText(query.value(7).toString());
+            QSqlQuery queryPhoto;
+            queryPhoto.prepare("SELECT photoname FROM photo WHERE photoid = :id");
+            queryPhoto.bindValue(":id",indexTemp);
+            queryPhoto.exec();
+            while(queryPhoto.next()){
+                QByteArray imageByte = queryPhoto.value(0).toByteArray();
+                QImage pixMap;
+                pixMap.loadFromData(imageByte);
+                QImage re = pixMap.scaled(100,200,Qt::KeepAspectRatio,Qt::SmoothTransformation);
+                photoLabel->setPixmap(QPixmap::fromImage(re));
+                QSettings settings("AO_Batrakov_Inc.", "Yarn");
+                settings.setValue("indexPhoto",indexTemp);
+            }
+        }
+    }
+
     setLayout(mainLayout);
 
     setWindowTitle(tr("Yarn"));
@@ -279,4 +309,47 @@ void YarnForm::seeFirmaRecord()
 void YarnForm::listFirmaRecord()
 {
 
+}
+
+void YarnForm::photoRead()
+{
+    QString fileName = QFileDialog::getOpenFileName(this,tr("Open File"),"",tr("Images (*.jpg *.gif *.png)"));
+    QFile file(fileName);
+    if(file.open(QIODevice::ReadOnly)){
+        if(file.size() > 600000){
+            int que = QMessageBox::warning(this,tr("Attention!"),
+                                 tr("File size - %1 ,\nAre You sure?").arg(QString::number(file.size())),
+                                           QMessageBox::Yes|QMessageBox::No,QMessageBox::No);
+            if(que == QMessageBox::No){
+                return;
+            }
+        }
+        QImage pixMap;
+        pixMap.load(fileName);
+        QImage re = pixMap.scaled(100,200,Qt::KeepAspectRatio,Qt::SmoothTransformation);
+        photoLabel->setPixmap(QPixmap::fromImage(re));
+        QSqlQuery queryPhotoControl;
+        queryPhotoControl.prepare("SELECT photoid FROM photo WHERE photoid = :id");
+        queryPhotoControl.bindValue(":id",indexTemp);
+        queryPhotoControl.exec();
+        queryPhotoControl.next();
+       if(queryPhotoControl.value(0).toString() == ""){
+            QSqlQuery queryPhoto;
+            queryPhoto.prepare("INSERT INTO photo (photoid, photoname) VALUES("
+                               ":photoid, :photoname)"
+                               );
+            queryPhoto.bindValue(":photoid",indexTemp);
+            QByteArray imageByte = file.readAll();
+            queryPhoto.bindValue(":photoname",imageByte);
+            queryPhoto.exec();
+        }else{
+            QSqlQuery queryPhoto;
+            queryPhoto.prepare("UPDATE photo SET photoname = :name "
+                               "WHERE photoid = :id)");
+            queryPhoto.bindValue(":id",indexTemp);
+            QByteArray imageByte = file.readAll();
+            queryPhoto.bindValue(":name",imageByte);
+            queryPhoto.exec();
+        }
+    }
 }

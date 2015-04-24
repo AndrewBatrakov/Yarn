@@ -165,12 +165,11 @@ void StructureForm::editRecord()
     if(query.isValid()){
         QSqlQuery queryU;
         queryU.prepare("UPDATE structure SET "
-                       "strucrurename = :name "
+                       "structurename = :name "
                        "WHERE structureid = :id");
         queryU.bindValue(":name",editStructure->text().simplified());
         queryU.bindValue(":id",indexTemp);
         queryU.exec();
-        qDebug()<<queryU.lastError().text();
     }else{
         QSqlQuery queryI;
         queryI.prepare("INSERT INTO structure ("
@@ -179,7 +178,6 @@ void StructureForm::editRecord()
         queryI.bindValue(":name",editStructure->text().simplified());
         queryI.bindValue(":id",indexTemp);
         queryI.exec();
-        qDebug()<<queryI.lastError().text();
     }
 }
 

@@ -31,8 +31,9 @@ private slots:
     void seeFirmaRecord();
     void listFirmaRecord();
 
-private:
+    void photoRead();
 
+private:
     QLabel *labelName;
     LineEdit *editName;
     QLabel *labelColor;

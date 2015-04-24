@@ -226,7 +226,6 @@ Update::Update(QWidget *parent) : QDialog(parent)
                            "stop:1 #585c5f);"
                            "color: #00cc00;}"
                            );
-    url = "http://91.102.219.74/QtProject/Yarn/Yarn.ini";
 }
 
 void Update::iniVersion()
@@ -240,7 +239,7 @@ void Update::iniVersion()
             QMessageBox::warning(this,tr("Attention!"),
                                  tr("Don't open %1!").arg(iniFileName));
         }else{
-
+            url = "http://91.102.219.74/QtProject/Yarn/Yarn.ini";
             replyIni = httpIni.get(QNetworkRequest(url));
             replyIni->ignoreSslErrors();
             connect(replyIni,SIGNAL(finished()),this,SLOT(httpDoneIni()));
@@ -295,6 +294,7 @@ void Update::exeVersion()
     fileRe.setFileName("./YarnFromSite.ini");
     fileRe.remove();
 
+    url = "http://91.102.219.74/QtProject/Yarn/Yarn.exe";
     replyExe->ignoreSslErrors();
     replyExe = httpExe.get(QNetworkRequest(url));
     connect(replyExe,SIGNAL(finished()),this,SLOT(httpDoneExe()));
@@ -315,6 +315,7 @@ void Update::tranceVersion()
     fileHttpTrance = new QFile("./Yarn_ru.qm");
     fileHttpTrance->open(QIODevice::WriteOnly);
 
+    url = "http://91.102.219.74/QtProject/Yarn/Yarn_ru.qm";
     replyTrance->ignoreSslErrors();
     replyTrance = httpTrance.get(QNetworkRequest(url));
     connect(replyTrance,SIGNAL(finished()),this,SLOT(httpDoneTrance()));
@@ -357,7 +358,12 @@ void Update::httpDoneIni()
 
 void Update::httpDoneExe()
 {
+#ifdef Q_OS_WIN32
     fileHttpExe->rename("./Yarn.exe");
+#else
+    fileHttpExe->rename("./Yarn.app");
+#endif
+
     fileHttpExe->close();
     tranceVersion();
 }
