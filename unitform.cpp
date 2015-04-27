@@ -1,9 +1,9 @@
-#include "colorform.h"
+#include "unitform.h"
 #include <QtSql>
 #include "numprefix.h"
 #include "fordelete.h"
 
-ColorForm::ColorForm(QString id, QWidget *parent, bool onlyForRead) :
+UnitForm::UnitForm(QString id, QWidget *parent, bool onlyForRead) :
     QDialog(parent)
 {
     readSettings();
@@ -32,7 +32,7 @@ ColorForm::ColorForm(QString id, QWidget *parent, bool onlyForRead) :
 
     if(indexTemp != ""){
         QSqlQuery query;
-        query.prepare("SELECT colorname FROM color WHERE colorid = ?");
+        query.prepare("SELECT unitname FROM unit WHERE unitid = ?");
         query.addBindValue(indexTemp);
         query.exec();
         while(query.next()){
@@ -52,36 +52,34 @@ ColorForm::ColorForm(QString id, QWidget *parent, bool onlyForRead) :
 
     setLayout(mainLayout);
 
-    setWindowTitle(tr("Color"));
+    setWindowTitle(tr("Unit"));
 }
 
-void ColorForm::editRecord()
+void UnitForm::editRecord()
 {
     if(indexTemp != ""){
         QSqlQuery query;
-        query.prepare("UPDATE color SET colorname = :name WHERE colorid = :id");
+        query.prepare("UPDATE unit SET unitname = :name WHERE unitid = :id");
         query.bindValue(":name",editForm->text());
         query.bindValue(":id",indexTemp);
         query.exec();
-        //nameTemp = editForm->text();
     }else{
         QSqlQuery query;
-        query.prepare("SELECT * FROM color WHERE colorname = :name");
+        query.prepare("SELECT * FROM unit WHERE unitname = :name");
         query.bindValue(":name",editForm->text().simplified());
         query.exec();
         query.next();
         if(!query.isValid()){
             NumPrefix numPrefix(this);
-            indexTemp = numPrefix.getPrefix("color");
+            indexTemp = numPrefix.getPrefix("unit");
             if(indexTemp == ""){
                 close();
             }else{
                 QSqlQuery query;
-                query.prepare("INSERT INTO color (colorid, colorname) VALUES(:id, :name)");
+                query.prepare("INSERT INTO unit (unitid, unitname) VALUES(:id, :name)");
                 query.bindValue(":id",indexTemp);
                 query.bindValue(":name",editForm->text().simplified());
                 query.exec();
-                //nameTemp = editOrganization->text();
             }
         }else{
             QString tempString = editForm->text();
@@ -93,9 +91,9 @@ void ColorForm::editRecord()
     close();
 }
 
-void ColorForm::deleteRecord()
+void UnitForm::deleteRecord()
 {
-    ForDelete forDelete(indexTemp,"color",this);
+    ForDelete forDelete(indexTemp,"unit",this);
 
     int tt = forDelete.result();
     //if(forDelete.result() != 0){
@@ -106,7 +104,7 @@ void ColorForm::deleteRecord()
     forDelete.deleteOnDefault();
     if(indexTemp != "OWN000000001"){
         QSqlQuery query;
-        query.prepare("DELETE FROM color WHERE colorid = :id");
+        query.prepare("DELETE FROM unit WHERE unitid = :id");
         query.bindValue(":id",indexTemp);
         query.exec();
         query.next();
@@ -116,33 +114,33 @@ void ColorForm::deleteRecord()
     // }
     // }
     /*else{
-           if(indexTemp != "OWN000000001"){
-               QSqlQuery query;
-               query.prepare("DELETE FROM organization WHERE organizationid = :id");
-               query.bindValue(":id",indexTemp);
-               query.exec();
-               query.next();
-           }else{
-               QMessageBox::warning(this,QObject::tr("Attention"),QObject::tr("You dont may delete default value!"));
-           }
-       }*/
+                          if(indexTemp != "OWN000000001"){
+                              QSqlQuery query;
+                              query.prepare("DELETE FROM organization WHERE organizationid = :id");
+                              query.bindValue(":id",indexTemp);
+                              query.exec();
+                              query.next();
+                          }else{
+                              QMessageBox::warning(this,QObject::tr("Attention"),QObject::tr("You dont may delete default value!"));
+                          }
+                      }*/
 
 }
 
-void ColorForm::done(int result)
+void UnitForm::done(int result)
 {
     writeSettings();
     QDialog::done(result);
 }
 
-void ColorForm::readSettings()
+void UnitForm::readSettings()
 {
     QSettings settings("AO_Batrakov_Inc.", "Yarn");
-    restoreGeometry(settings.value("Color").toByteArray());
+    restoreGeometry(settings.value("Unit").toByteArray());
 }
 
-void ColorForm::writeSettings()
+void UnitForm::writeSettings()
 {
     QSettings settings("AO_Batrakov_Inc.", "Yarn");
-    settings.setValue("Color", saveGeometry());
+    settings.setValue("Unit", saveGeometry());
 }

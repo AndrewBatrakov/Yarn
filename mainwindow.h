@@ -34,6 +34,7 @@ private slots:
     void viewMaterial();
     void viewStructure();
     void viewYarn();
+    void viewUnit();
 
     void putBaseProcedure();
     void getBaseProcedure();
@@ -64,7 +65,7 @@ private:
     QAction *materialAction;
     QAction *colorAction;
     QAction *productAction;
-
+    QAction *unitAction;
 
     //QMenu *documentMenu;
 

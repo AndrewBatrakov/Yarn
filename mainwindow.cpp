@@ -4,6 +4,7 @@
 #include "structureform.h"
 #include "yarnform.h"
 #include "putbase.h"
+#include "unitform.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -324,6 +325,8 @@ void MainWindow::createActions()
     connect(materialAction,SIGNAL(triggered()),this,SLOT(viewMaterial()));
     colorAction = new QAction(tr("Color..."),this);
     connect(colorAction,SIGNAL(triggered()),this,SLOT(viewColor()));
+    unitAction = new QAction(tr("Unit..."),this);
+    connect(unitAction,SIGNAL(triggered()),this,SLOT(viewUnit()));
 
     //Documents Action
 
@@ -358,6 +361,7 @@ void MainWindow::createMenu()
     referenceMenu->addAction(structureAction);
     referenceMenu->addAction(materialAction);
     referenceMenu->addAction(colorAction);
+    referenceMenu->addAction(unitAction);
 
     //documentMenu = menuBar()->addMenu(tr("Documents"));
     //documentMenu->addSeparator();
@@ -460,6 +464,10 @@ void MainWindow::editRecordOfTable()
             QString iD = record.value("yarnid").toString();
             YarnForm form(iD, this, false);
             form.exec();
+        }else if(stringVar == "unit"){
+            QString iD = record.value("unitid").toString();
+            UnitForm form(iD, this, false);
+            form.exec();
         }
     }
     QModelIndex modIndex = tableView->currentIndex();
@@ -488,6 +496,9 @@ void MainWindow::addRecordOfTable()
             form.exec();
         }else if(valueTemp == "yarn"){
             YarnForm form("",this,false);
+            form.exec();
+        }else if(valueTemp == "unit"){
+            UnitForm form("",this,false);
             form.exec();
         }
 //        if(tableView->currentIndex().isValid()){
@@ -540,6 +551,10 @@ void MainWindow::deleteRecordOfTable()
                 iDValue = record.value("yarnid").toString();
                 YarnForm form(iDValue,this,false);
                 form.deleteRecord();
+            }else if(valueTemp == "unit"){
+                iDValue = record.value("unitid").toString();
+                UnitForm form(iDValue,this,false);
+                form.deleteRecord();
             }
         }
     }
@@ -587,10 +602,17 @@ void MainWindow::viewTemplateTable(QString tempTable)
         templateModel->setHeaderData(5,Qt::Horizontal, tr("Structure"));
         templateModel->setHeaderData(6,Qt::Horizontal, tr("Produser"));
         templateModel->setHeaderData(7,Qt::Horizontal, tr("Thickness"));
+        templateModel->setHeaderData(8,Qt::Horizontal, tr("Unit"));
         if(setFilter){
             templateModel->setFilter(QString("yarnname LIKE '%%1%'").arg(filterTable));
         }
         strivgValue = tr("Yarn");
+    }else if(tempTable == "unit"){
+        templateModel->setHeaderData(1,Qt::Horizontal,tr("Name"));
+        if(setFilter){
+            templateModel->setFilter(QString("unitname LIKE '%%1%'").arg(filterTable));
+        }
+        strivgValue = tr("Unit");
     }
     else{
         tableView->setModel(0);
@@ -682,6 +704,11 @@ void MainWindow::viewStructure()
 void MainWindow::viewYarn()
 {
     viewTemplateTable("yarn");
+}
+
+void MainWindow::viewUnit()
+{
+    viewTemplateTable("unit");
 }
 
 void MainWindow::putBaseProcedure()

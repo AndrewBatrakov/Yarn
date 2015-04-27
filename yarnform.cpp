@@ -1,7 +1,11 @@
 #include "yarnform.h"
 #include <QtSql>
+#include <QtNetwork/QTcpSocket>
 
-YarnForm::YarnForm(QString iD, QWidget *parent, bool onlyForRead) : QDialog(parent)
+
+
+YarnForm::YarnForm(QString iD, QWidget *parent, bool onlyForRead)
+    : QDialog(parent)
 {
     readSettings();
     indexTemp = iD;
