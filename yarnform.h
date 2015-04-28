@@ -30,6 +30,9 @@ private slots:
     void addFirmaRecord();
     void seeFirmaRecord();
     void listFirmaRecord();
+    void addUnitRecord();
+    void seeUnitRecord();
+    void listUnitRecord();
 
     void photoRead();
 
@@ -49,6 +52,8 @@ private:
     QLabel *labelThickness;
     LineEdit *editThickness;
     PhotoLabel *photoLabel;
+    QLabel *labelUnit;
+    LineEdit *editUnit;
 
     QPushButton *saveButton;
     QPushButton *cancelButton;

@@ -8,23 +8,6 @@ StructureForm::StructureForm(QString id,QWidget *parent, bool onlyForRead) : QDi
     readSettings();
     indexTemp = id;
 
-    labelPhoto = new PhotoLabel;
-    labelPhoto->setToolTip("No Photo");
-    labelPhoto->setText("No Photo");
-    labelPhoto->setMinimumSize(100,200);
-    labelPhoto->setFrameShape(QFrame::NoFrame);
-    labelPhoto->setCursor(Qt::PointingHandCursor);
-    labelPhoto->setAlignment(Qt::AlignCenter);
-    labelPhoto->setStyleSheet("QLabel:hover {background-color: "
-                              "qlineargradient(x1:0,y1:0,x2:0,y2:1,"
-                              "stop:0 #cfcccc,"
-                              "stop:0.5 #333232,"
-                              "stop:0.51 #000000,"
-                              "stop:1 #585c5f);"
-                              "color: #00cc00;"
-                              "font: bold;}");
-    connect(labelPhoto,SIGNAL(clicked()),this,SLOT(photoRead()));
-
     labelStructure = new QLabel;
     editStructure = new LineEdit;
     editStructure->setReadOnly(true);
@@ -84,7 +67,6 @@ StructureForm::StructureForm(QString id,QWidget *parent, bool onlyForRead) : QDi
     mainLayout->addWidget(editStructure,0,1);
     mainLayout->addLayout(tableButtonBox,1,0,1,2);
     mainLayout->addWidget(tableWidget,2,0,1,2);
-    mainLayout->addWidget(labelPhoto,0,2,3,1);
     if(!onlyForRead){
         mainLayout->addWidget(buttonBox,3,1);
         editStructure->selectAll();
@@ -122,19 +104,6 @@ StructureForm::StructureForm(QString id,QWidget *parent, bool onlyForRead) : QDi
                     tableWidget->item(row,2)->setText(queryName.value(0).toString());
                     ++row;
                 }
-            }
-            QSqlQuery queryPhoto;
-            queryPhoto.prepare("SELECT photoname FROM photo WHERE photoid = :id");
-            queryPhoto.bindValue(":id",indexTemp);
-            queryPhoto.exec();
-            while(queryPhoto.next()){
-                QByteArray imageByte = queryPhoto.value(0).toByteArray();
-                QImage pixMap;
-                pixMap.loadFromData(imageByte);
-                QImage re = pixMap.scaled(100,200,Qt::KeepAspectRatio,Qt::SmoothTransformation);
-                labelPhoto->setPixmap(QPixmap::fromImage(re));
-                QSettings settings("AO_Batrakov_Inc.", "Yarn");
-                settings.setValue("indexPhoto",indexTemp);
             }
         }
     }else{
@@ -191,6 +160,18 @@ void StructureForm::deleteRecord()
 
 void StructureForm::saveRecord()
 {
+    editStructure->clear();
+    tableWidget->sortByColumn(1,Qt::DescendingOrder);
+    QString value = "";// = editStructure->text();
+    for(int rowT = 0; rowT < tableWidget->rowCount(); ++rowT){
+        if(!value.isEmpty())
+            value += ", ";
+        value += tableWidget->item(rowT,0)->text();
+        value += " ";
+        value += tableWidget->item(rowT,1)->text();
+        value += "%";
+    }
+    editStructure->setText(value);
     editRecord();
     emit accept();
 }
@@ -228,7 +209,7 @@ void StructureForm::addRecordOfTable()
         for(int val = 0; val < row; ++val){
             que = que + tableWidget->item(val,1)->text().toInt() ;
         }
-        QString value = editStructure->text();
+        //QString value = editStructure->text();
         while(query.next()){
 
             int val = que + query.value(2).toInt();
@@ -251,12 +232,14 @@ void StructureForm::addRecordOfTable()
             tableWidget->setItem(row,2,item3);
             tableWidget->item(row,2)->setText(query.value(0).toString());
 
-            if(!value.isEmpty())
-                value += ", ";
-            value += query.value(1).toString();
-            value += " ";
-            value += query.value(2).toString();
-            value += "%";
+            //sortTable(1);
+
+//            if(!value.isEmpty())
+//                value += ", ";
+//            value += query.value(1).toString();
+//            value += " ";
+//            value += query.value(2).toString();
+//            value += "%";
 
             NumPrefix numPrefix(this);
             QString rowPrefix = numPrefix.getPrefix("structuretable");
@@ -269,14 +252,14 @@ void StructureForm::addRecordOfTable()
             queryTable.bindValue(":materialid",query.value(0).toString());
             queryTable.exec();
         }
-        editStructure->setText(value);
+        //editStructure->setText(value);
     //}
 }
 
 void StructureForm::deleteRecordOfTable()
 {
     int que = QMessageBox::warning(this,tr("Attention!"),
-                                   tr("Really delete&"),
+                                   tr("Really delete?"),
                                    QMessageBox::Yes|QMessageBox::No,QMessageBox::No);
     if(que == QMessageBox::Yes){
         int rowNow = tableWidget->currentRow();
@@ -285,7 +268,10 @@ void StructureForm::deleteRecordOfTable()
         query.prepare("DELETE FROM structuretable WHERE structuretableid = :id");
         query.bindValue(":id",tableWidget->item(rowNow,2)->text());
         query.exec();
+
         tableWidget->removeRow(tableWidget->currentRow());
+
+        //sortTable(1);
         tableWidget->repaint();
     }
 }
@@ -314,6 +300,8 @@ void StructureForm::editRecordOfTable()
         QTableWidgetItem *item3 = new QTableWidgetItem;
         tableWidget->setItem(rowNow,2,item3);
         tableWidget->item(rowNow,2)->setText(query.value(0).toString());
+
+        //sortTable(1);
         tableWidget->setColumnHidden(2,true);
         tableWidget->repaint();
     }
@@ -332,55 +320,8 @@ void StructureForm::writeSettings()
     settings.remove("indexPhoto");
 }
 
-void StructureForm::photoRead()
-{
-    QString fileName = QFileDialog::getOpenFileName(this,tr("Open File"),"",tr("Images (*.jpg *.gif *.png)"));
-    QFile file(fileName);
-    if(file.open(QIODevice::ReadOnly)){
-        if(file.size() > 600000){
-            int que = QMessageBox::warning(this,tr("Attention!"),
-                                 tr("File size - %1 ,\nAre You sure?").arg(QString::number(file.size())),
-                                           QMessageBox::Yes|QMessageBox::No,QMessageBox::No);
-            if(que == QMessageBox::No){
-                return;
-            }
-        }
-        QImage pixMap;
-        pixMap.load(fileName);
-        QImage re = pixMap.scaled(100,200,Qt::KeepAspectRatio,Qt::SmoothTransformation);
-        labelPhoto->setPixmap(QPixmap::fromImage(re));
-        QSqlQuery queryPhotoControl;
-        queryPhotoControl.prepare("SELECT photoid FROM photo WHERE photoid = :id");
-        queryPhotoControl.bindValue(":id",indexTemp);
-        queryPhotoControl.exec();
-        queryPhotoControl.next();
-       if(queryPhotoControl.value(0).toString() == ""){
-            QSqlQuery queryPhoto;
-            queryPhoto.prepare("INSERT INTO photo (photoid, photoname) VALUES("
-                               ":photoid, :photoname)"
-                               );
-            queryPhoto.bindValue(":photoid",indexTemp);
-            QByteArray imageByte = file.readAll();
-            queryPhoto.bindValue(":photoname",imageByte);
-            queryPhoto.exec();
-        }else{
-            QSqlQuery queryPhoto;
-            queryPhoto.prepare("UPDATE photo SET photoname = :name "
-                               "WHERE photoid = :id)");
-            queryPhoto.bindValue(":id",indexTemp);
-            QByteArray imageByte = file.readAll();
-            queryPhoto.bindValue(":name",imageByte);
-            queryPhoto.exec();
-        }
-    }
-}
-
 void StructureForm::sortTable(int index)
 {
-//    templateModel->setSort(index,Qt::AscendingOrder);
-//    templateModel->select();
-    //while(templateModel->canFetchMore())
-    //    templateModel->fetchMore();
     tableWidget->setSortingEnabled(true);
     tableWidget->sortByColumn(index,Qt::AscendingOrder);
 }

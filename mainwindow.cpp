@@ -318,7 +318,7 @@ void MainWindow::createActions()
 
     //References Action
     yarnAction = new QAction(tr("Yarn..."),this);
-    //connect(yarnAction,SIGNAL(triggered()),this,SLOT(viewPerfo()));
+    connect(yarnAction,SIGNAL(triggered()),this,SLOT(viewYarn()));
     structureAction = new QAction(tr("Structure..."),this);
     connect(structureAction,SIGNAL(triggered()),this,SLOT(viewStructure()));
     materialAction = new QAction(tr("Material..."),this);

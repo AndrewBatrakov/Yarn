@@ -70,7 +70,8 @@ YarnForm::YarnForm(QString iD, QWidget *parent, bool onlyForRead)
     colorModel->setQuery("SELECT colorname FROM color");
     QCompleter *colorComplieter = new QCompleter(colorModel);
     colorComplieter->setCompletionMode(QCompleter::InlineCompletion);
-    colorComplieter->setCaseSensitivity(Qt::CaseSensitive);
+    colorComplieter->setCompletionMode(QCompleter::PopupCompletion);
+    colorComplieter->setCaseSensitivity(Qt::CaseInsensitive);
     editColor->setCompleter(colorComplieter);
     QToolButton *addColorButton = new QToolButton;
     QPixmap addPix(":/add.png");
@@ -115,7 +116,8 @@ YarnForm::YarnForm(QString iD, QWidget *parent, bool onlyForRead)
     structureModel->setQuery("SELECT structurename FROM structure");
     QCompleter *structureComplieter = new QCompleter(structureModel);
     structureComplieter->setCompletionMode(QCompleter::InlineCompletion);
-    structureComplieter->setCaseSensitivity(Qt::CaseSensitive);
+    structureComplieter->setCompletionMode(QCompleter::PopupCompletion);
+    structureComplieter->setCaseSensitivity(Qt::CaseInsensitive);
     editStructure->setCompleter(structureComplieter);
     QToolButton *addStructureButton = new QToolButton;
     addStructureButton->setIcon(addPix);
@@ -144,7 +146,8 @@ YarnForm::YarnForm(QString iD, QWidget *parent, bool onlyForRead)
     firmaModel->setQuery("SELECT firmaname FROM firma");
     QCompleter *firmaComplieter = new QCompleter(firmaModel);
     firmaComplieter->setCompletionMode(QCompleter::InlineCompletion);
-    firmaComplieter->setCaseSensitivity(Qt::CaseSensitive);
+    firmaComplieter->setCompletionMode(QCompleter::PopupCompletion);
+    firmaComplieter->setCaseSensitivity(Qt::CaseInsensitive);
     editFirma->setCompleter(firmaComplieter);
     QToolButton *addFirmaButton = new QToolButton;
     addFirmaButton->setIcon(addPix);
@@ -313,6 +316,21 @@ void YarnForm::seeFirmaRecord()
 void YarnForm::listFirmaRecord()
 {
 
+}
+
+void YarnForm::addUnitRecord()
+{
+    
+}
+
+void YarnForm::seeUnitRecord()
+{
+    
+}
+
+void YarnForm::listUnitRecord()
+{
+    
 }
 
 void YarnForm::photoRead()
