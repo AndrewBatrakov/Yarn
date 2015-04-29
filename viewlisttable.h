@@ -21,6 +21,8 @@ private slots:
     void createContextMenu();
     void searchProcedure();
     void viewTemplateTable(QString);
+    void readSetting();
+    void writeSetting();
 
 private:
     QSqlRelationalTableModel *templateModel;

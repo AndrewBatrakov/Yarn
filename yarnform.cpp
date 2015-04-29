@@ -1,8 +1,10 @@
 #include "yarnform.h"
 #include <QtSql>
-#include <QtNetwork/QTcpSocket>
-
-
+#include "colorform.h"
+#include "structureform.h"
+#include "firmaform.h"
+#include "viewlisttable.h"
+#include "numprefix.h"
 
 YarnForm::YarnForm(QString iD, QWidget *parent, bool onlyForRead)
     : QDialog(parent)
@@ -78,16 +80,19 @@ YarnForm::YarnForm(QString iD, QWidget *parent, bool onlyForRead)
     addColorButton->setIcon(addPix);
     addColorButton->setToolTip(tr("Add new Color"));
     addColorButton->setStyleSheet(styleToolButton);
+    connect(addColorButton,SIGNAL(clicked()),this,SLOT(addColorRecord()));
     QToolButton *seeColorButton = new QToolButton;
     QPixmap seePix(":/see.png");
     seeColorButton->setIcon(seePix);
     seeColorButton->setToolTip(tr("See this Color"));
     seeColorButton->setStyleSheet(styleToolButton);
+    connect(seeColorButton,SIGNAL(clicked()),this,SLOT(seeColorRecord()));
     QToolButton *listColorButton = new QToolButton;
     QPixmap listPix(":/list.png");
     listColorButton->setIcon(listPix);
     listColorButton->setToolTip(tr("List of Colors"));
     listColorButton->setStyleSheet(styleToolButton);
+    connect(listColorButton,SIGNAL(clicked()),this,SLOT(listColorRecord()));
     QHBoxLayout *colorLayout = new QHBoxLayout;
     //colorLayout->addWidget(labelColor);
     colorLayout->addWidget(editColor);
@@ -123,14 +128,17 @@ YarnForm::YarnForm(QString iD, QWidget *parent, bool onlyForRead)
     addStructureButton->setIcon(addPix);
     addStructureButton->setToolTip(tr("Add new Structure"));
     addStructureButton->setStyleSheet(styleToolButton);
+    connect(addStructureButton,SIGNAL(clicked()),this,SLOT(addStructureRecord()));
     QToolButton *seeStructureButton = new QToolButton;
     seeStructureButton->setIcon(seePix);
     seeStructureButton->setToolTip(tr("See this Structure"));
     seeStructureButton->setStyleSheet(styleToolButton);
+    connect(seeStructureButton,SIGNAL(clicked()),this,SLOT(seeStructureRecord()));
     QToolButton *listStructureButton = new QToolButton;
     listStructureButton->setIcon(listPix);
     listStructureButton->setToolTip(tr("List of Structures"));
     listStructureButton->setStyleSheet(styleToolButton);
+    connect(listStructureButton,SIGNAL(clicked()),this,SLOT(listStructureRecord()));
     QHBoxLayout *structureLayout = new QHBoxLayout;
     //structureLayout->addWidget(labelStructure);
     structureLayout->addWidget(editStructure);
@@ -153,14 +161,17 @@ YarnForm::YarnForm(QString iD, QWidget *parent, bool onlyForRead)
     addFirmaButton->setIcon(addPix);
     addFirmaButton->setToolTip(tr("Add new Firma"));
     addFirmaButton->setStyleSheet(styleToolButton);
+    connect(addFirmaButton,SIGNAL(clicked()),this,SLOT(addFirmaRecord()));
     QToolButton *seeFirmaButton = new QToolButton;
     seeFirmaButton->setIcon(seePix);
     seeFirmaButton->setToolTip(tr("See this Firma"));
     seeFirmaButton->setStyleSheet(styleToolButton);
+    connect(seeFirmaButton,SIGNAL(clicked()),this,SLOT(seeFirmaRecord()));
     QToolButton *listFirmaButton = new QToolButton;
     listFirmaButton->setIcon(listPix);
     listFirmaButton->setToolTip(tr("List of Firms"));
     listFirmaButton->setStyleSheet(styleToolButton);
+    connect(listFirmaButton,SIGNAL(clicked()),this,SLOT(listFirmaRecord()));
     QHBoxLayout *firmaLayout = new QHBoxLayout;
    // firmaLayout->addWidget(labelFirma);
     firmaLayout->addWidget(editFirma);
@@ -175,6 +186,39 @@ YarnForm::YarnForm(QString iD, QWidget *parent, bool onlyForRead)
     QRegExp regExpTh("[x * 0-9 ]{9}");
     editThickness->setValidator(new QRegExpValidator(regExpTh,this));
     labelThickness->setBuddy(editThickness);
+
+    labelUnit = new QLabel(tr("Unit:"));
+    editUnit = new LineEdit;
+    editUnit->setValidator(new QRegExpValidator(regExp,this));
+    QSqlQueryModel *unitModel = new QSqlQueryModel;
+    unitModel->setQuery("SELECT unitname FROM unit");
+    QCompleter *unitComplieter = new QCompleter(unitModel);
+    unitComplieter->setCompletionMode(QCompleter::InlineCompletion);
+    unitComplieter->setCompletionMode(QCompleter::PopupCompletion);
+    unitComplieter->setCaseSensitivity(Qt::CaseInsensitive);
+    editUnit->setCompleter(unitComplieter);
+    QToolButton *addUnitButton = new QToolButton;
+    addUnitButton->setIcon(addPix);
+    addUnitButton->setToolTip(tr("Add new Unit"));
+    addUnitButton->setStyleSheet(styleToolButton);
+    connect(addUnitButton,SIGNAL(clicked()),this,SLOT(addUnitRecord()));
+    QToolButton *seeUnitButton = new QToolButton;
+    seeUnitButton->setIcon(seePix);
+    seeUnitButton->setToolTip(tr("See this Unit"));
+    seeUnitButton->setStyleSheet(styleToolButton);
+    connect(seeUnitButton,SIGNAL(clicked()),this,SLOT(seeUnitRecord()));
+    QToolButton *listUnitButton = new QToolButton;
+    listUnitButton->setIcon(listPix);
+    listUnitButton->setToolTip(tr("List of Units"));
+    listUnitButton->setStyleSheet(styleToolButton);
+    connect(listUnitButton,SIGNAL(clicked()),this,SLOT(listUnitRecord()));
+    QHBoxLayout *unitLayout = new QHBoxLayout;
+   // firmaLayout->addWidget(labelFirma);
+    unitLayout->addWidget(editUnit);
+    unitLayout->addWidget(addUnitButton);
+    unitLayout->addWidget(seeUnitButton);
+    unitLayout->addWidget(listUnitButton);
+    unitLayout->addStretch();
 
     saveButton = new QPushButton(tr("Save"));
     connect(saveButton,SIGNAL(clicked()),this,SLOT(editRecord()));
@@ -191,7 +235,7 @@ YarnForm::YarnForm(QString iD, QWidget *parent, bool onlyForRead)
     buttonBox->addButton(saveButton,QDialogButtonBox::ActionRole);
 
     QGridLayout *mainLayout = new QGridLayout;
-    mainLayout->addWidget(photoLabel,0,0,8,1);
+    mainLayout->addWidget(photoLabel,0,0,9,1);
     mainLayout->addWidget(labelName,0,1);
     mainLayout->addWidget(editName,0,2);
     mainLayout->addWidget(labelColor,1,1);
@@ -206,8 +250,10 @@ YarnForm::YarnForm(QString iD, QWidget *parent, bool onlyForRead)
     mainLayout->addLayout(firmaLayout,5,2,1,2);
     mainLayout->addWidget(labelThickness,6,1);
     mainLayout->addWidget(editThickness,6,2);
+    mainLayout->addWidget(labelUnit,7,1);
+    mainLayout->addLayout(unitLayout,7,2);
     if(!onlyForRead){
-        mainLayout->addWidget(buttonBox,7,2);
+        mainLayout->addWidget(buttonBox,8,2);
         editName->selectAll();
     }
 
@@ -218,11 +264,26 @@ YarnForm::YarnForm(QString iD, QWidget *parent, bool onlyForRead)
         query.exec();
         while(query.next()){
             editName->setText(query.value(1).toString());
-            editColor->setText(query.value(2).toString());
+            QSqlQuery queryCol;
+            queryCol.prepare("SELECT colorname FROM color WHERE colorid = :colorid");
+            queryCol.bindValue(":colorid",query.value(2).toString());
+            queryCol.exec();
+            queryCol.next();
+            editColor->setText(queryCol.value(0).toString());
             editLenght->setText(query.value(3).toString());
             editWeight->setText(query.value(4).toString());
-            editStructure->setText(query.value(5).toString());
-            editFirma->setText(query.value(6).toString());
+            QSqlQuery querySt;
+            querySt.prepare("SELECT structurename FROM structure WHERE structureid = :structureid");
+            querySt.bindValue(":structureid",query.value(5).toString());
+            querySt.exec();
+            querySt.next();
+            editStructure->setText(querySt.value(0).toString());
+            QSqlQuery queryF;
+            queryF.prepare("SELECT firmaname FROM firma WHERE firmaid = :firmaid");
+            queryF.bindValue(":firmaid",query.value(6).toString());
+            queryF.exec();
+            queryF.next();
+            editFirma->setText(queryF.value(0).toString());
             editThickness->setText(query.value(7).toString());
             QSqlQuery queryPhoto;
             queryPhoto.prepare("SELECT photoname FROM photo WHERE photoid = :id");
@@ -258,64 +319,237 @@ void YarnForm::deleteRecord()
 
 void YarnForm::editRecord()
 {
-
+    if(indexTemp != ""){
+        QSqlQuery query;
+        query.prepare("UPDATE yarn SET "
+                      "yarnname = :name, "
+                      "colorid = (SELECT colorid FROM color WHERE colorname = :colorname), "
+                      "lenght = :lenght, "
+                      "weight = :weight, "
+                      "structureid = (SELECT structureid FROM structure WHERE structurename = :structurename), "
+                      "firmaid = (SELECT firmaid FROM firma WHERE firmaname = :firmaname), "
+                      "thickness = :thickness, "
+                      "unitid = (SELECT unitid FROM unit WHERE unitname = :unitname) "
+                      "WHERE yarnid = :id");
+        query.bindValue(":name",editName->text());
+        query.bindValue(":colorname",editColor->text());
+        query.bindValue(":lenght",editLenght->text().toInt());
+        query.bindValue(":weight",editWeight->text().toInt());
+        query.bindValue(":structurename",editStructure->text());
+        query.bindValue(":firmaname",editFirma->text());
+        query.bindValue(":thickness",editThickness->text());
+//        qDebug()<<editThickness->text();
+//        query.bindValue(":unitname",editUnit->text());
+//        qDebug()<<editUnit->text();
+        query.bindValue(":id",indexTemp);
+        query.exec();
+         qDebug()<<query.lastError().text();
+    }else{
+        QSqlQuery query;
+        query.prepare("SELECT * FROM yarn WHERE yarnname = :name");
+        query.bindValue(":name",editName->text().simplified());
+        query.exec();
+        query.next();
+        if(!query.isValid()){
+            NumPrefix numPrefix(this);
+            indexTemp = numPrefix.getPrefix("yarn");
+            qDebug()<<indexTemp;
+            if(indexTemp == ""){
+                close();
+            }else{
+                QSqlQuery query;
+                query.prepare("INSERT INTO yarn (yarnid, "
+                              "yarnname, "
+                              "colorid, "
+                              "lenght, "
+                              "weight, "
+                              "structureid, "
+                              "firmaid, "
+                              "thickness, "
+                              "unitid) "
+                              " VALUES(:id, "
+                              ":name, "
+                              "(SELECT colorid FROM color WHERE colorname = :colorname), "
+                              ":lenght, "
+                              ":weight, "
+                              "(SELECT structureid FROM structure WHERE structurename = :structurename), "
+                              "(SELECT firmaid FROM firma WHERE firmaname = :firmaname), "
+                              ":thickness, "
+                              "(SELECT unitid FROM unit WHERE unitname = :unitname))");
+                query.bindValue(":id",indexTemp);
+                query.bindValue(":name",editName->text().simplified());
+                query.bindValue(":colorname",editColor->text());
+                query.bindValue(":lenght",editLenght->text().toInt());
+                query.bindValue(":weight",editWeight->text().toInt());
+                query.bindValue(":structurename",editStructure->text());
+                query.bindValue(":firmaname",editFirma->text());
+                query.bindValue(":thickness",editThickness->text());
+                query.bindValue(":unitname",editUnit->text());
+                query.exec();
+                qDebug()<<query.lastError().text();
+            }
+        }else{
+            QString tempString = editName->text();
+            tempString += QObject::tr(" is availble!");
+            QMessageBox::warning(this,QObject::tr("Atention!!!"),tempString);
+        }
+    }
+    emit accept();
+    close();
 }
+
 
 void YarnForm::readSettings()
 {
     QSettings settings("AO_Batrakov_Inc.", "Yarn");
-    restoreGeometry(settings.value("Yarn").toByteArray());
+    restoreGeometry(settings.value("YarnForm").toByteArray());
 }
 
 void YarnForm::writeSettings()
 {
     QSettings settings("AO_Batrakov_Inc.", "Yarn");
-    restoreGeometry(settings.value("Yarn").toByteArray());
+    settings.setValue("YarnForm", saveGeometry());
 }
 
 void YarnForm::addColorRecord()
 {
-
+    ColorForm formOpen("",this,false);
+    formOpen.exec();
+    if(formOpen.rowOut() != ""){
+        QSqlQuery query;
+        query.prepare("SELECT colorname FROM color WHERE "
+                      "colorid = :id");
+        query.bindValue(":id",formOpen.rowOut());
+        query.exec();
+        query.next();
+        editColor->setText(query.value(0).toString());
+    }
 }
 
 void YarnForm::seeColorRecord()
 {
-
+    QSqlQuery query;
+    query.prepare("SELECT colorid FROM color WHERE colorname = :name");
+    query.bindValue(":name",editColor->text());
+    query.exec();
+    while(query.next()){
+        ColorForm formOpen(query.value(0).toString(),this,true);
+        formOpen.exec();
+    }
 }
 
 void YarnForm::listColorRecord()
 {
-
+    QSqlQuery query;
+    query.prepare("SELECT colorid FROM color WHERE colorname = :name");
+    query.bindValue(":name",editColor->text());
+    query.exec();
+    query.next();
+    ViewListTable listOpen(query.value(0).toString(),"color",this);
+    listOpen.exec();
+    if(listOpen.rowOut() != ""){
+        QSqlQuery queryL;
+        queryL.prepare("SELECT colorname FROM color WHERE "
+                      "colorid = :id");
+        queryL.bindValue(":id",listOpen.rowOut());
+        queryL.exec();
+        queryL.next();
+        editColor->setText(queryL.value(0).toString());
+    }
 }
 
 void YarnForm::addStructureRecord()
 {
-
+    StructureForm formOpen("",this,false);
+    formOpen.exec();
+    if(formOpen.rowOut() != ""){
+        QSqlQuery query;
+        query.prepare("SELECT structurename FROM structure WHERE "
+                      "structureid = :id");
+        query.bindValue(":id",formOpen.rowOut());
+        query.exec();
+        query.next();
+        editStructure->setText(query.value(0).toString());
+    }
 }
 
 void YarnForm::seeStructureRecord()
 {
-
+    QSqlQuery query;
+    query.prepare("SELECT structureid FROM structure WHERE structurename = :name");
+    query.bindValue(":name",editStructure->text());
+    query.exec();
+    while(query.next()){
+        StructureForm formOpen(query.value(0).toString(),this,true);
+        formOpen.exec();
+    }
 }
 
 void YarnForm::listStructureRecord()
 {
-
+    QSqlQuery query;
+    query.prepare("SELECT structureid FROM structure WHERE structurename = :name");
+    query.bindValue(":name",editStructure->text());
+    query.exec();
+    query.next();
+    ViewListTable listOpen(query.value(0).toString(),"structure",this);
+    listOpen.exec();
+    if(listOpen.rowOut() != ""){
+        QSqlQuery queryL;
+        queryL.prepare("SELECT structurename FROM structure WHERE "
+                      "structureid = :id");
+        queryL.bindValue(":id",listOpen.rowOut());
+        queryL.exec();
+        queryL.next();
+        editStructure->setText(queryL.value(0).toString());
+    }
 }
 
 void YarnForm::addFirmaRecord()
 {
-
+    FirmaForm formOpen("",this,false);
+    formOpen.exec();
+    if(formOpen.rowOut() != ""){
+        QSqlQuery query;
+        query.prepare("SELECT firmaname FROM firma WHERE "
+                      "firmaid = :id");
+        query.bindValue(":id",formOpen.rowOut());
+        query.exec();
+        query.next();
+        editFirma->setText(query.value(0).toString());
+    }
 }
 
 void YarnForm::seeFirmaRecord()
 {
-
+    QSqlQuery query;
+    query.prepare("SELECT firmaid FROM firma WHERE firmaname = :name");
+    query.bindValue(":name",editFirma->text());
+    query.exec();
+    while(query.next()){
+        FirmaForm formOpen(query.value(0).toString(),this,true);
+        formOpen.exec();
+    }
 }
 
 void YarnForm::listFirmaRecord()
 {
-
+    QSqlQuery query;
+    query.prepare("SELECT firmaid FROM firma WHERE firmaname = :name");
+    query.bindValue(":name",editFirma->text());
+    query.exec();
+    query.next();
+    ViewListTable listOpen(query.value(0).toString(),"firma",this);
+    listOpen.exec();
+    if(listOpen.rowOut() != ""){
+        QSqlQuery queryL;
+        queryL.prepare("SELECT firmaname FROM firma WHERE "
+                      "firmaid = :id");
+        queryL.bindValue(":id",listOpen.rowOut());
+        queryL.exec();
+        queryL.next();
+        editFirma->setText(queryL.value(0).toString());
+    }
 }
 
 void YarnForm::addUnitRecord()

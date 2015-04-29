@@ -3,9 +3,11 @@
 #include "materialform.h"
 #include "structureform.h"
 #include "colorform.h"
+#include "firmaform.h"
 
 ViewListTable::ViewListTable(QString idTable, QString nameTable, QWidget *parent) : QDialog(parent)
 {
+    readSetting();
     tableName = nameTable;
     iDTemp = idTable;
     labelName = "";
@@ -67,12 +69,13 @@ ViewListTable::ViewListTable(QString idTable, QString nameTable, QWidget *parent
     connect(tableView,SIGNAL(doubleClicked(QModelIndex)),this,SLOT(accept()));
 
     setWindowTitle(tr("List of %1").arg(labelName));
-    resize(tableView->size().width()+200,tableView->size().height());
+    resize(tableView->size().width()+100,tableView->size().height());
 
     createContextMenu();
 }
 void ViewListTable::done(int result)
 {
+    writeSetting();
     if(result == QDialog::Accepted){
         QModelIndex index = tableView->currentIndex();
         if(index.isValid()){
@@ -93,6 +96,18 @@ void ViewListTable::addRecord()
     QString nameList;
     if(tableName == "material"){
         MaterialForm listForm("",this,false);
+        listForm.exec();
+        nameList = listForm.rowOut();
+    }else if(tableName == "color"){
+        ColorForm listForm("",this,false);
+        listForm.exec();
+        nameList = listForm.rowOut();
+    }else if(tableName == "structure"){
+        StructureForm listForm("",this,false);
+        listForm.exec();
+        nameList = listForm.rowOut();
+    }else if(tableName == "firma"){
+        FirmaForm listForm("",this,false);
         listForm.exec();
         nameList = listForm.rowOut();
     }
@@ -127,6 +142,15 @@ void ViewListTable::deleteRecord()
         if(tableName == "material"){
             MaterialForm listForm(idList,this,false);
             listForm.deleteRecord();
+        }else if(tableName == "color"){
+            ColorForm listForm(idList,this,false);
+            listForm.deleteRecord();
+        }else if(tableName == "structure"){
+            StructureForm listForm(idList,this,false);
+            listForm.deleteRecord();
+        }else if(tableName == "firma"){
+            FirmaForm listForm(idList,this,false);
+            listForm.deleteRecord();
         }
         updatePanel(index);
     }
@@ -139,6 +163,15 @@ void ViewListTable::editRecord()
     QString idList = record.value(0).toString();
     if(tableName == "material"){
         MaterialForm listFrom(idList,this,false);
+        listFrom.exec();
+    }else if(tableName == "color"){
+        ColorForm listFrom(idList,this,false);
+        listFrom.exec();
+    }else if(tableName == "structure"){
+        StructureForm listFrom(idList,this,false);
+        listFrom.exec();
+    }else if(tableName == "firma"){
+        FirmaForm listFrom(idList,this,false);
         listFrom.exec();
     }
     updatePanel(index);
@@ -192,7 +225,7 @@ void ViewListTable::viewTemplateTable(QString)
     if(tableName == "material"){
         templateModel->setHeaderData(1,Qt::Horizontal,tr("Name"));
         templateModel->setHeaderData(1,Qt::Horizontal,tr("Persent"));
-        labelName = "Material";
+        labelName = tr("Material");
         if(setFilter){
             templateModel->setFilter(QString("materialname LIKE '%%1%'").arg(filterTable));
         }
@@ -202,6 +235,24 @@ void ViewListTable::viewTemplateTable(QString)
         templateModel->setHeaderData(2,Qt::Horizontal,tr("Organization Name"));
         if(setFilter){
             templateModel->setFilter(QString("subdivisionname LIKE '%%1%'").arg(filterTable));
+        }
+    }else if(tableName == "color"){
+        templateModel->setHeaderData(1,Qt::Horizontal,tr("Name"));
+        labelName = tr("Color");
+        if(setFilter){
+            templateModel->setFilter(QString("colorname LIKE '%%1%'").arg(filterTable));
+        }
+    }else if(tableName == "structure"){
+        templateModel->setHeaderData(1,Qt::Horizontal,tr("Name"));
+        labelName = tr("Structure");
+        if(setFilter){
+            templateModel->setFilter(QString("structurename LIKE '%%1%'").arg(filterTable));
+        }
+    }else if(tableName == "firma"){
+        templateModel->setHeaderData(1,Qt::Horizontal,tr("Name"));
+        labelName = tr("Firma");
+        if(setFilter){
+            templateModel->setFilter(QString("firmaname LIKE '%%1%'").arg(filterTable));
         }
     }
     templateModel->setSort(1,Qt::AscendingOrder);
@@ -221,4 +272,17 @@ void ViewListTable::viewTemplateTable(QString)
     tableView->setSelectionMode(QAbstractItemView::SingleSelection);
     tableView->setSelectionBehavior(QAbstractItemView::SelectRows);
     tableView->setEditTriggers(QAbstractItemView::NoEditTriggers);
+}
+
+
+void ViewListTable::readSetting()
+{
+    QSettings settings("AO_Batrakov_Inc.", "Yarn");
+    restoreGeometry(settings.value("ViewListTable").toByteArray());
+}
+
+void ViewListTable::writeSetting()
+{
+    QSettings settings("AO_Batrakov_Inc.", "Yarn");
+    settings.setValue("ViewListTable", saveGeometry());
 }

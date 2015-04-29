@@ -5,6 +5,7 @@
 #include "yarnform.h"
 #include "putbase.h"
 #include "unitform.h"
+#include "firmaform.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -327,6 +328,8 @@ void MainWindow::createActions()
     connect(colorAction,SIGNAL(triggered()),this,SLOT(viewColor()));
     unitAction = new QAction(tr("Unit..."),this);
     connect(unitAction,SIGNAL(triggered()),this,SLOT(viewUnit()));
+    firmaAction = new QAction(tr("Firma..."),this);
+    connect(firmaAction,SIGNAL(triggered()),this,SLOT(viewFirma()));
 
     //Documents Action
 
@@ -362,6 +365,7 @@ void MainWindow::createMenu()
     referenceMenu->addAction(materialAction);
     referenceMenu->addAction(colorAction);
     referenceMenu->addAction(unitAction);
+    referenceMenu->addAction(firmaAction);
 
     //documentMenu = menuBar()->addMenu(tr("Documents"));
     //documentMenu->addSeparator();
@@ -468,6 +472,10 @@ void MainWindow::editRecordOfTable()
             QString iD = record.value("unitid").toString();
             UnitForm form(iD, this, false);
             form.exec();
+        }else if(stringVar == "firma"){
+            QString iD = record.value("firmaid").toString();
+            FirmaForm form(iD, this, false);
+            form.exec();
         }
     }
     QModelIndex modIndex = tableView->currentIndex();
@@ -499,6 +507,9 @@ void MainWindow::addRecordOfTable()
             form.exec();
         }else if(valueTemp == "unit"){
             UnitForm form("",this,false);
+            form.exec();
+        }else if(valueTemp == "firma"){
+            FirmaForm form("",this,false);
             form.exec();
         }
 //        if(tableView->currentIndex().isValid()){
@@ -555,6 +566,10 @@ void MainWindow::deleteRecordOfTable()
                 iDValue = record.value("unitid").toString();
                 UnitForm form(iDValue,this,false);
                 form.deleteRecord();
+            }else if(valueTemp == "firma"){
+                iDValue = record.value("firmaid").toString();
+                FirmaForm form(iDValue,this,false);
+                form.deleteRecord();
             }
         }
     }
@@ -596,11 +611,14 @@ void MainWindow::viewTemplateTable(QString tempTable)
         strivgValue = tr("Structure");
     }else if(tempTable == "yarn"){
         templateModel->setHeaderData(1,Qt::Horizontal, tr("Yarn Name"));
+        templateModel->setRelation(2,QSqlRelation("color","colorid","colorname"));
         templateModel->setHeaderData(2,Qt::Horizontal, tr("Color"));
         templateModel->setHeaderData(3,Qt::Horizontal, tr("Lenght"));
         templateModel->setHeaderData(4,Qt::Horizontal, tr("Weight"));
+        templateModel->setRelation(5,QSqlRelation("structure","structureid","structurename"));
         templateModel->setHeaderData(5,Qt::Horizontal, tr("Structure"));
-        templateModel->setHeaderData(6,Qt::Horizontal, tr("Produser"));
+        templateModel->setRelation(6,QSqlRelation("firma","firmaid","firmaname"));
+        templateModel->setHeaderData(6,Qt::Horizontal, tr("Firma"));
         templateModel->setHeaderData(7,Qt::Horizontal, tr("Thickness"));
         templateModel->setHeaderData(8,Qt::Horizontal, tr("Unit"));
         if(setFilter){
@@ -613,6 +631,12 @@ void MainWindow::viewTemplateTable(QString tempTable)
             templateModel->setFilter(QString("unitname LIKE '%%1%'").arg(filterTable));
         }
         strivgValue = tr("Unit");
+    }else if(tempTable == "firma"){
+        templateModel->setHeaderData(1,Qt::Horizontal,tr("Name"));
+        if(setFilter){
+            templateModel->setFilter(QString("firmaname LIKE '%%1%'").arg(filterTable));
+        }
+        strivgValue = tr("Firma");
     }
     else{
         tableView->setModel(0);
@@ -709,6 +733,11 @@ void MainWindow::viewYarn()
 void MainWindow::viewUnit()
 {
     viewTemplateTable("unit");
+}
+
+void MainWindow::viewFirma()
+{
+    viewTemplateTable("firma");
 }
 
 void MainWindow::putBaseProcedure()

@@ -35,6 +35,7 @@ private slots:
     void viewStructure();
     void viewYarn();
     void viewUnit();
+    void viewFirma();
 
     void putBaseProcedure();
     void getBaseProcedure();
@@ -66,6 +67,7 @@ private:
     QAction *colorAction;
     QAction *productAction;
     QAction *unitAction;
+    QAction *firmaAction;
 
     //QMenu *documentMenu;
 
