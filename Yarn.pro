@@ -30,3 +30,5 @@ RESOURCES += \
 RC_FILE = Yarn.rc
 
 DISTFILES +=
+
+FORMS +=

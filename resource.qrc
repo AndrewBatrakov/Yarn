@@ -7,5 +7,6 @@
         <file>logo.png</file>
         <file>list.png</file>
         <file>see.png</file>
+        <file>print.png</file>
     </qresource>
 </RCC>

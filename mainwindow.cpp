@@ -244,7 +244,7 @@ MainWindow::MainWindow(QWidget *parent)
     createMenu();
     createContextMenu();
 
-    viewYarn();
+   viewYarn();
 }
 
 MainWindow::~MainWindow()
@@ -411,9 +411,15 @@ void MainWindow::createContextMenu()
     editAction->setIcon(pixEdit);
     connect(editAction,SIGNAL(triggered()),this,SLOT(editRecordOfTable()));
 
+    //QPixmap pixEdit(":/edit.png");
+    copyAction = new QAction(tr("Copy Record"),this);
+    //editAction->setIcon(pixEdit);
+    //connect(editAction,SIGNAL(triggered()),this,SLOT(editRecordOfTable()));
+
     tableView->addAction(addAction);
     tableView->addAction(deleteAction);
     tableView->addAction(editAction);
+    tableView->addAction(copyAction);
     tableView->setContextMenuPolicy(Qt::ActionsContextMenu);
 }
 void MainWindow::aboutProgramm()
@@ -620,6 +626,7 @@ void MainWindow::viewTemplateTable(QString tempTable)
         templateModel->setRelation(6,QSqlRelation("firma","firmaid","firmaname"));
         templateModel->setHeaderData(6,Qt::Horizontal, tr("Firma"));
         templateModel->setHeaderData(7,Qt::Horizontal, tr("Thickness"));
+        templateModel->setRelation(8,QSqlRelation("unit","unitid","unitname"));
         templateModel->setHeaderData(8,Qt::Horizontal, tr("Unit"));
         if(setFilter){
             templateModel->setFilter(QString("yarnname LIKE '%%1%'").arg(filterTable));

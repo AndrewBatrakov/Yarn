@@ -267,6 +267,12 @@ bool Update::newVersion()
             nowSettings.sync();
             resultUpdate = true;
             exeVersion();
+        }else{
+            QFile fileRe;
+            fileRe.setFileName("./YarnFromSite.ini");
+            if(fileRe.exists()){
+                fileRe.remove();
+            }
         }
     }
     return resultUpdate;

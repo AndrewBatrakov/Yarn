@@ -5,6 +5,7 @@
 #include "firmaform.h"
 #include "viewlisttable.h"
 #include "numprefix.h"
+#include "unitform.h"
 
 YarnForm::YarnForm(QString iD, QWidget *parent, bool onlyForRead)
     : QDialog(parent)
@@ -42,20 +43,19 @@ YarnForm::YarnForm(QString iD, QWidget *parent, bool onlyForRead)
             "color: #00cc00}";
 
     photoLabel = new PhotoLabel;
-    photoLabel->setToolTip("No Photo");
+
     photoLabel->setText("No Photo");
     photoLabel->setMinimumSize(100,200);
     photoLabel->setFrameShape(QFrame::NoFrame);
     photoLabel->setCursor(Qt::PointingHandCursor);
     photoLabel->setAlignment(Qt::AlignCenter);
     photoLabel->setStyleSheet("QLabel:hover {background-color: "
-                              "qlineargradient(x1:0,y1:0,x2:0,y2:1,"
+                              "qlineargradient(spread:pad, cx:0.5, cy:0.5, radius:0.5, fx:0.5, fy:0.5,"
                               "stop:0 #cfcccc,"
-                              "stop:0.5 #333232,"
-                              "stop:0.51 #000000,"
-                              "stop:1 #585c5f);"
+                              "stop:1 #ffffff);"
                               "color: #00cc00;"
                               "font: bold;}");
+
     connect(photoLabel,SIGNAL(clicked()),this,SLOT(photoRead()));
 
     labelName = new QLabel(tr("Name:"));
@@ -183,7 +183,7 @@ YarnForm::YarnForm(QString iD, QWidget *parent, bool onlyForRead)
     labelThickness = new QLabel(tr("Thickness:"));
     editThickness = new LineEdit;
     editThickness->setReadOnly(onlyForRead);
-    QRegExp regExpTh("[x * 0-9 ]{9}");
+    QRegExp regExpTh("[x * 0-9 /]{9}");
     editThickness->setValidator(new QRegExpValidator(regExpTh,this));
     labelThickness->setBuddy(editThickness);
 
@@ -285,10 +285,21 @@ YarnForm::YarnForm(QString iD, QWidget *parent, bool onlyForRead)
             queryF.next();
             editFirma->setText(queryF.value(0).toString());
             editThickness->setText(query.value(7).toString());
+            QSqlQuery queryU;
+            queryU.prepare("SELECT unitname FROM unit WHERE unitid = :unitid");
+            queryU.bindValue(":unitid",query.value(8).toString());
+            queryU.exec();
+            queryU.next();
+            editUnit->setText(queryU.value(0).toString());
             QSqlQuery queryPhoto;
             queryPhoto.prepare("SELECT photoname FROM photo WHERE photoid = :id");
             queryPhoto.bindValue(":id",indexTemp);
             queryPhoto.exec();
+            if(!queryPhoto.isActive()){
+                photoLabel->setToolTip("No Photo");
+            }else{
+                photoLabel->setToolTip("Photo Of Yarn");
+            }
             while(queryPhoto.next()){
                 QByteArray imageByte = queryPhoto.value(0).toByteArray();
                 QImage pixMap;
@@ -314,7 +325,11 @@ void YarnForm::done(int result)
 
 void YarnForm::deleteRecord()
 {
-
+    QSqlQuery query;
+    query.prepare("DELETE FROM yarn WHERE yarnid = :id");
+    query.bindValue(":id",indexTemp);
+    query.exec();
+    query.next();
 }
 
 void YarnForm::editRecord()
@@ -338,12 +353,9 @@ void YarnForm::editRecord()
         query.bindValue(":structurename",editStructure->text());
         query.bindValue(":firmaname",editFirma->text());
         query.bindValue(":thickness",editThickness->text());
-//        qDebug()<<editThickness->text();
-//        query.bindValue(":unitname",editUnit->text());
-//        qDebug()<<editUnit->text();
+        query.bindValue(":unitname",editUnit->text());
         query.bindValue(":id",indexTemp);
         query.exec();
-         qDebug()<<query.lastError().text();
     }else{
         QSqlQuery query;
         query.prepare("SELECT * FROM yarn WHERE yarnname = :name");
@@ -386,7 +398,6 @@ void YarnForm::editRecord()
                 query.bindValue(":thickness",editThickness->text());
                 query.bindValue(":unitname",editUnit->text());
                 query.exec();
-                qDebug()<<query.lastError().text();
             }
         }else{
             QString tempString = editName->text();
@@ -554,17 +565,49 @@ void YarnForm::listFirmaRecord()
 
 void YarnForm::addUnitRecord()
 {
-    
+    UnitForm formOpen("",this,false);
+    formOpen.exec();
+    if(formOpen.rowOut() != ""){
+        QSqlQuery query;
+        query.prepare("SELECT unitname FROM unit WHERE "
+                      "unitid = :id");
+        query.bindValue(":id",formOpen.rowOut());
+        query.exec();
+        query.next();
+        editUnit->setText(query.value(0).toString());
+    }
 }
 
 void YarnForm::seeUnitRecord()
 {
-    
+    QSqlQuery query;
+    query.prepare("SELECT unitid FROM unit WHERE unitname = :name");
+    query.bindValue(":name",editUnit->text());
+    query.exec();
+    while(query.next()){
+        UnitForm formOpen(query.value(0).toString(),this,true);
+        formOpen.exec();
+    }
 }
 
 void YarnForm::listUnitRecord()
 {
-    
+    QSqlQuery query;
+    query.prepare("SELECT unitid FROM unit WHERE unitname = :name");
+    query.bindValue(":name",editUnit->text());
+    query.exec();
+    query.next();
+    ViewListTable listOpen(query.value(0).toString(),"unit",this);
+    listOpen.exec();
+    if(listOpen.rowOut() != ""){
+        QSqlQuery queryL;
+        queryL.prepare("SELECT unitname FROM unit WHERE "
+                      "unitid = :id");
+        queryL.bindValue(":id",listOpen.rowOut());
+        queryL.exec();
+        queryL.next();
+        editUnit->setText(queryL.value(0).toString());
+    }
 }
 
 void YarnForm::photoRead()
