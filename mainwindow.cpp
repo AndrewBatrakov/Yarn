@@ -6,6 +6,8 @@
 #include "putbase.h"
 #include "unitform.h"
 #include "firmaform.h"
+#include "getbase.h"
+#include "journalform.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -330,6 +332,8 @@ void MainWindow::createActions()
     connect(unitAction,SIGNAL(triggered()),this,SLOT(viewUnit()));
     firmaAction = new QAction(tr("Firma..."),this);
     connect(firmaAction,SIGNAL(triggered()),this,SLOT(viewFirma()));
+    journalAction = new QAction(tr("Journal..."),this);
+    connect(journalAction,SIGNAL(triggered()),this,SLOT(viewJournal()));
 
     //Documents Action
 
@@ -366,6 +370,7 @@ void MainWindow::createMenu()
     referenceMenu->addAction(colorAction);
     referenceMenu->addAction(unitAction);
     referenceMenu->addAction(firmaAction);
+    referenceMenu->addAction(journalAction);
 
     //documentMenu = menuBar()->addMenu(tr("Documents"));
     //documentMenu->addSeparator();
@@ -414,7 +419,7 @@ void MainWindow::createContextMenu()
     //QPixmap pixEdit(":/edit.png");
     copyAction = new QAction(tr("Copy Record"),this);
     //editAction->setIcon(pixEdit);
-    //connect(editAction,SIGNAL(triggered()),this,SLOT(editRecordOfTable()));
+    connect(editAction,SIGNAL(triggered()),this,SLOT(copyRecordOfTable()));
 
     tableView->addAction(addAction);
     tableView->addAction(deleteAction);
@@ -482,6 +487,10 @@ void MainWindow::editRecordOfTable()
             QString iD = record.value("firmaid").toString();
             FirmaForm form(iD, this, false);
             form.exec();
+        }else if(stringVar == "journal"){
+            QString iD = record.value("journalid").toString();
+            JournalForm form(iD, this, false);
+            form.exec();
         }
     }
     QModelIndex modIndex = tableView->currentIndex();
@@ -516,6 +525,9 @@ void MainWindow::addRecordOfTable()
             form.exec();
         }else if(valueTemp == "firma"){
             FirmaForm form("",this,false);
+            form.exec();
+        }else if(valueTemp == "journal"){
+            JournalForm form("",this,false);
             form.exec();
         }
 //        if(tableView->currentIndex().isValid()){
@@ -575,6 +587,10 @@ void MainWindow::deleteRecordOfTable()
             }else if(valueTemp == "firma"){
                 iDValue = record.value("firmaid").toString();
                 FirmaForm form(iDValue,this,false);
+                form.deleteRecord();
+            }else if(valueTemp == "journal"){
+                iDValue = record.value("journalid").toString();
+                JournalForm form(iDValue,this,false);
                 form.deleteRecord();
             }
         }
@@ -644,8 +660,13 @@ void MainWindow::viewTemplateTable(QString tempTable)
             templateModel->setFilter(QString("firmaname LIKE '%%1%'").arg(filterTable));
         }
         strivgValue = tr("Firma");
-    }
-    else{
+    }else if(tempTable == "journal"){
+        templateModel->setHeaderData(1,Qt::Horizontal,tr("Name"));
+        if(setFilter){
+            templateModel->setFilter(QString("journalname LIKE '%%1%'").arg(filterTable));
+        }
+        strivgValue = tr("Journal");
+    }else{
         tableView->setModel(0);
         tableLabel->clear();
         delAll = true;
@@ -747,6 +768,11 @@ void MainWindow::viewFirma()
     viewTemplateTable("firma");
 }
 
+void MainWindow::viewJournal()
+{
+    viewTemplateTable("journal");
+}
+
 void MainWindow::putBaseProcedure()
 {
     PutBase put(this);
@@ -755,5 +781,17 @@ void MainWindow::putBaseProcedure()
 
 void MainWindow::getBaseProcedure()
 {
+    GetBase get(this);
+    get.getBaseHttp();
+}
 
+void MainWindow::copyRecordOfTable()
+{
+//    QString stringVar = templateModel->tableName();
+//    QModelIndex index = tableView->currentIndex();
+//    if(index.isValid()){
+//        QSqlRecord record =templateModel->record(index.row());
+//        if(stringVar == "color"){
+//            QString iD = record.value("colorid").toString();
+//    QSqlQueryModel tableModel;
 }

@@ -29,6 +29,7 @@ private slots:
     void addRecordOfTable();
     void deleteRecordOfTable();
     void editRecordOfTable();
+    void copyRecordOfTable();
 
     void viewColor();
     void viewMaterial();
@@ -36,6 +37,7 @@ private slots:
     void viewYarn();
     void viewUnit();
     void viewFirma();
+    void viewJournal();
 
     void putBaseProcedure();
     void getBaseProcedure();
@@ -68,6 +70,7 @@ private:
     QAction *productAction;
     QAction *unitAction;
     QAction *firmaAction;
+    QAction *journalAction;
 
     //QMenu *documentMenu;
 
