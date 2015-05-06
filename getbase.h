@@ -19,6 +19,8 @@ private slots:
     void updateDataReadProgress(qint64,qint64);
     void httpReadyRead();
 
+    void closeConnection();
+
 private:
     QUrl url;
     QNetworkAccessManager http;

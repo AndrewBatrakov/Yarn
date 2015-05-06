@@ -10,22 +10,26 @@ void GetBase::getBaseHttp()
     fileHttp = new QFile("Yarn.dat");
     fileHttp->open(QIODevice::WriteOnly);
     url = "http://91.102.219.74/QtProject/Yarn/Base/Yarn.dat";
+    //url = "http://91.102.219.74/QtProject/Yarn/Yarn.exe";
 
     reply = http.get(QNetworkRequest(url));
-    connect(reply,SIGNAL(finished()),this,SLOT(httpDone()));
     connect(reply,SIGNAL(readyRead()),this,SLOT(httpReadyRead()));
+    connect(reply,SIGNAL(finished()),this,SLOT(httpDone()));
+
     connect(reply,SIGNAL(downloadProgress(qint64,qint64)),this,
+            SLOT(updateDataReadProgress(qint64,qint64)));
+    connect(reply,SIGNAL(uploadProgress(qint64,qint64)),this,
             SLOT(updateDataReadProgress(qint64,qint64)));
 
     progressDialog->setLabelText(tr("Downloading DataBase ..."));
-    progressDialog->setEnabled(false);
+    progressDialog->setEnabled(true);
     progressDialog->exec();
 }
 
 void GetBase::httpDone()
 {
     fileHttp->close();
-    http.destroyed();
+    closeConnection();
 }
 
 void GetBase::updateDataReadProgress(qint64 readBytes, qint64 totalBytes)
@@ -38,5 +42,11 @@ void GetBase::httpReadyRead()
 {
     if(fileHttp)
         fileHttp->write(reply->readAll());
+
+}
+
+void GetBase::closeConnection()
+{
     progressDialog->hide();
+    http.destroyed();
 }
