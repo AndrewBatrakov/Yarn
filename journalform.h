@@ -2,6 +2,7 @@
 #define JOURNALFORM_H
 
 #include <QtWidgets>
+#include <QtGui>
 #include "lineedit.h"
 
 class JournalForm : public QDialog
@@ -24,9 +25,17 @@ private slots:
     void itemClicked();
     void createContextMenu();
 
+    void addPhoto();
+    void editPhoto();
+    void deletePhoto();
+
 private:
-    QLabel *labelForm;
-    LineEdit *editForm;
+    QLabel *labelName;
+    LineEdit *editName;
+    QLabel *labelNumber;
+    LineEdit *editNumber;
+    QLabel *labelYear;
+    LineEdit *editYear;
 
     QListWidget *listWidget;
 
