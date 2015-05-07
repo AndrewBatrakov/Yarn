@@ -60,6 +60,8 @@ JournalForm::JournalForm(QString id, QWidget *parent, bool onlyForRead) :
         query.exec();
         while(query.next()){
             editName->setText(query.value(1).toString());
+            editNumber->setText(query.value(2).toString());
+            editYear->setText(query.value(3).toString());
             QSqlQuery queryPhoto;
             queryPhoto.prepare("SELECT * FROM journalphoto WHERE journalid = :id");
             queryPhoto.bindValue(":id",indexTemp);
@@ -104,9 +106,12 @@ void JournalForm::editRecord()
 {
     if(indexTemp != ""){
         QSqlQuery query;
-        query.prepare("UPDATE journal SET journalname = :name WHERE journalid = :id");
+        query.prepare("UPDATE journal SET journalname = :name, number = :number, year = :year "
+                      "WHERE journalid = :id");
         query.bindValue(":name",editName->text());
         query.bindValue(":id",indexTemp);
+        query.bindValue(":number",editNumber->text().toInt());
+        query.bindValue(":year",editYear->text().toInt());
         query.exec();
     }else{
         QSqlQuery query;
@@ -121,11 +126,13 @@ void JournalForm::editRecord()
                 close();
             }else{
                 QSqlQuery query;
-                query.prepare("INSERT INTO journal (journalid, journalname) VALUES(:id, :name)");
+                query.prepare("INSERT INTO journal (journalid, journalname, "
+                              "number, year) VALUES(:id, :name, :number, :year)");
                 query.bindValue(":id",indexTemp);
                 query.bindValue(":name",editName->text().simplified());
+                query.bindValue(":number",editNumber->text().toInt());
+                query.bindValue(":year",editYear->text().toInt());
                 query.exec();
-                //nameTemp = editOrganization->text();
             }
         }else{
             QString tempString = editName->text();

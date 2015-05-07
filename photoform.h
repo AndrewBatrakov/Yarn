@@ -11,12 +11,14 @@ public:
 
 private slots:
     void maxCount();
+    void createContextMenu();
 
 private:
     QLabel *photoLabel;
     QString journalID;
     int pageNumber;
     int pageMax;
+    QAction *editTag;
 
 protected:
     void mousePressEvent(QMouseEvent *);

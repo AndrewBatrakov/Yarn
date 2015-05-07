@@ -6,7 +6,8 @@ SOURCES  += \
     $$PWD/unitform.cpp \
     $$PWD/firmaform.cpp \
     $$PWD/journalform.cpp \
-    $$PWD/photoform.cpp
+    $$PWD/photoform.cpp \
+    $$PWD/tegform.cpp
 
 HEADERS  += \  
     $$PWD/colorform.h \
@@ -16,4 +17,5 @@ HEADERS  += \
     $$PWD/unitform.h \
     $$PWD/firmaform.h \
     $$PWD/journalform.h \
-    $$PWD/photoform.h
+    $$PWD/photoform.h \
+    $$PWD/tegform.h

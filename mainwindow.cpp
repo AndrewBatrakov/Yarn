@@ -419,7 +419,7 @@ void MainWindow::createContextMenu()
     //QPixmap pixEdit(":/edit.png");
     copyAction = new QAction(tr("Copy Record"),this);
     //editAction->setIcon(pixEdit);
-    connect(editAction,SIGNAL(triggered()),this,SLOT(copyRecordOfTable()));
+    connect(copyAction,SIGNAL(triggered()),this,SLOT(copyRecordOfTable()));
 
     tableView->addAction(addAction);
     tableView->addAction(deleteAction);
@@ -662,6 +662,8 @@ void MainWindow::viewTemplateTable(QString tempTable)
         strivgValue = tr("Firma");
     }else if(tempTable == "journal"){
         templateModel->setHeaderData(1,Qt::Horizontal,tr("Name"));
+        templateModel->setHeaderData(2,Qt::Horizontal,tr("Number"));
+        templateModel->setHeaderData(3,Qt::Horizontal,tr("Year"));
         if(setFilter){
             templateModel->setFilter(QString("journalname LIKE '%%1%'").arg(filterTable));
         }
@@ -794,4 +796,5 @@ void MainWindow::copyRecordOfTable()
 //        if(stringVar == "color"){
 //            QString iD = record.value("colorid").toString();
 //    QSqlQueryModel tableModel;
+
 }
