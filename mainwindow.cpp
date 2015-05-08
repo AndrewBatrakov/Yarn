@@ -15,6 +15,7 @@ MainWindow::MainWindow(QWidget *parent)
     QPixmap pixLogo(":/logo.png");
     setWindowIcon(pixLogo);
 
+#ifdef Q_OS_WIN
     QWidget::setStyleSheet("MainWindow, QMessageBox, QDialog, QMenu, QAction, QMenuBar {background-color: "
                            "#DDD6FF}"
                            "QMenu {"
@@ -239,6 +240,7 @@ MainWindow::MainWindow(QWidget *parent)
                            "stop:1 #585c5f);"
                            "color: #00cc00;}"
                            );
+#endif
     readSettings();
     createPanel();
     setFilter =false;
