@@ -4,6 +4,7 @@
 #include "structureform.h"
 #include "colorform.h"
 #include "firmaform.h"
+#include "tegform.h"
 
 ViewListTable::ViewListTable(QString idTable, QString nameTable, QWidget *parent) : QDialog(parent)
 {
@@ -110,6 +111,10 @@ void ViewListTable::addRecord()
         FirmaForm listForm("",this,false);
         listForm.exec();
         nameList = listForm.rowOut();
+    }else if(tableName == "teg"){
+        TegForm listForm("",this,false);
+        listForm.exec();
+        nameList = listForm.rowOut();
     }
     templateModel->select();
     for(int row = 0; row < templateModel->rowCount(); ++row){
@@ -151,6 +156,9 @@ void ViewListTable::deleteRecord()
         }else if(tableName == "firma"){
             FirmaForm listForm(idList,this,false);
             listForm.deleteRecord();
+        }else if(tableName == "teg"){
+            TegForm listForm(idList,this,false);
+            listForm.deleteRecord();
         }
         updatePanel(index);
     }
@@ -172,6 +180,9 @@ void ViewListTable::editRecord()
         listFrom.exec();
     }else if(tableName == "firma"){
         FirmaForm listFrom(idList,this,false);
+        listFrom.exec();
+    }else if(tableName == "teg"){
+        TegForm listFrom(idList,this,false);
         listFrom.exec();
     }
     updatePanel(index);
@@ -253,6 +264,12 @@ void ViewListTable::viewTemplateTable(QString)
         labelName = tr("Firma");
         if(setFilter){
             templateModel->setFilter(QString("firmaname LIKE '%%1%'").arg(filterTable));
+        }
+    }else if(tableName == "teg"){
+        templateModel->setHeaderData(1,Qt::Horizontal,tr("Name"));
+        labelName = tr("Teg");
+        if(setFilter){
+            templateModel->setFilter(QString("tegname LIKE '%%1%'").arg(filterTable));
         }
     }
     templateModel->setSort(1,Qt::AscendingOrder);

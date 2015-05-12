@@ -1,16 +1,14 @@
-#ifndef STRUCTUREFORM_H
-#define STRUCTUREFORM_H
+#ifndef TEGFORM_H
+#define TEGFORM_H
 
 #include <QtWidgets>
-#include <QtSql>
-#include "lineedit.h"
 
-class StructureForm : public QDialog
+class TegTableForm : public QDialog
 {
     Q_OBJECT
 
 public:
-    StructureForm(QString,QWidget *,bool);
+    TegTableForm(QString,QWidget *,bool);
     void done(int result);
     QString rowOut() const {return indexTemp;};
 
@@ -34,14 +32,12 @@ private slots:
 
 private:
 
-    QLabel *labelStructure;
-    LineEdit *editStructure;
-
     QPushButton *saveButton;
     QPushButton *cancelButton;
     QDialogButtonBox *buttonBox;
 
     QString indexTemp;
+    QString indexJournalPhoto;
 
     QPushButton *addRecordButton;
     QPushButton *editRecordButton;
@@ -54,4 +50,4 @@ private:
     QTableWidget *tableWidget;
 };
 
-#endif // STRUCTUREFORM_H
+#endif // TEGFORM_H

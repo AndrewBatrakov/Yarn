@@ -19,6 +19,7 @@ private:
     int pageNumber;
     int pageMax;
     QAction *editTag;
+    QString indexTemp;
 
 protected:
     void mousePressEvent(QMouseEvent *);

@@ -79,7 +79,7 @@ private:
     QMenu *serviceMenu;
     //QAction *ademantAction;
     //QAction *ftpAction;
-    //QAction *searchAction;
+    QAction *searchAction;
     QAction *putAction;
     QAction *getAction;
     //QAction *vaccumAction;

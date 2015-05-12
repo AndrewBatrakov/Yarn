@@ -1,6 +1,6 @@
 #include "photoform.h"
 #include <QtSql>
-#include "tegform.h"
+#include "tegtableform.h"
 
 PhotoForm::PhotoForm(QString idJournal, int page, QWidget *parent) : QDialog(parent)
 {
@@ -11,12 +11,13 @@ PhotoForm::PhotoForm(QString idJournal, int page, QWidget *parent) : QDialog(par
     maxCount();
 
     QSqlQuery query;
-    query.prepare("SELECT journalphoto FROM journalphoto WHERE (journalid = :journalid AND page = :page)");
+    query.prepare("SELECT journalphoto, journalphotoid FROM journalphoto WHERE (journalid = :journalid AND page = :page)");
     query.bindValue(":journalid",journalID);
     query.bindValue(":page",pageNumber);
     query.exec();
     query.next();
 
+    indexTemp = query.value(1).toString();
     QByteArray imageByte = query.value(0).toByteArray();
     QImage pixMap;
     pixMap.loadFromData(imageByte);
@@ -63,12 +64,12 @@ void PhotoForm::mousePressEvent(QMouseEvent *mouseEvent)
     }else if(mouseEvent->button() == Qt::RightButton){
         QMenu menu(photoLabel);
         QPixmap pixD(":/edit.png");
-        menu.addAction(pixD,tr("Edit Tags For Search"));
+        menu.addAction(pixD,tr("Edit Tegs For Search"));
         menu.setContextMenuPolicy(Qt::ActionsContextMenu);
         QAction *m = menu.exec(mouseEvent->globalPos());
         if(m){
-            TegForm tegForm(this);
-            tegForm.exec();
+            TegTableForm openForm(indexTemp,this,false);
+            openForm.exec();
         }
     }
 }

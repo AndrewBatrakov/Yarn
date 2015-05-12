@@ -11,8 +11,6 @@ StructureForm::StructureForm(QString id,QWidget *parent, bool onlyForRead) : QDi
     labelStructure = new QLabel;
     editStructure = new LineEdit;
     editStructure->setReadOnly(true);
-    //QRegExp regExp("[\\x0410-\\x044f 0-9 \" -]{150}");
-    //editMaterial->setValidator(new QRegExpValidator(regExp,this));
     labelStructure->setBuddy(editStructure);
 
     saveButton = new QPushButton(tr("Save"));
@@ -58,9 +56,6 @@ StructureForm::StructureForm(QString id,QWidget *parent, bool onlyForRead) : QDi
     tableButtonBox->addWidget(deleteRecordButton);
     tableButtonBox->addWidget(editRecordButton);
     tableButtonBox->addStretch();
-
-    templateModel = new QSqlRelationalTableModel(this);
-    templateModel->setEditStrategy(QSqlRelationalTableModel::OnManualSubmit);
 
     QGridLayout *mainLayout = new QGridLayout;
     mainLayout->addWidget(labelStructure,0,0);
@@ -172,8 +167,20 @@ void StructureForm::saveRecord()
         value += "%";
     }
     editStructure->setText(value);
-    editRecord();
-    emit accept();
+
+    QSqlQuery query;
+    query.prepare("SELECT * FROM structure WHERE structurename = :structurename");
+    query.bindValue(":structurename",editStructure->text());
+    query.exec();
+    query.next();
+    if(!query.isValid()){
+        editRecord();
+        emit accept();
+    }else{
+        QString tempString = editStructure->text();
+        tempString += QObject::tr(" is availble!");
+        QMessageBox::warning(this,QObject::tr("Atention!!!"),tempString);
+    }
 }
 
 void StructureForm::cancelRecord()
@@ -196,64 +203,60 @@ void StructureForm::done(int result)
 
 void StructureForm::addRecordOfTable()
 {
-    //if(checkingFill()){
-        ViewListTable viewListTable("","material",this);
-        viewListTable.exec();
-        QString rr = viewListTable.rowOut();
-        QSqlQuery query;
-        query.prepare("SELECT * FROM material WHERE materialid = :id");
-        query.bindValue(":id",rr);
-        query.exec();
-        int row = tableWidget->rowCount();
-        int que = 0;
-        for(int val = 0; val < row; ++val){
-            que = que + tableWidget->item(val,1)->text().toInt() ;
+    ViewListTable viewListTable("","material",this);
+    viewListTable.exec();
+    QString rr = viewListTable.rowOut();
+    QSqlQuery query;
+    query.prepare("SELECT * FROM material WHERE materialid = :id");
+    query.bindValue(":id",rr);
+    query.exec();
+    int row = tableWidget->rowCount();
+    int que = 0;
+    for(int val = 0; val < row; ++val){
+        que = que + tableWidget->item(val,1)->text().toInt() ;
+    }
+    QString value = editStructure->text();
+    while(query.next()){
+
+        int val = que + query.value(2).toInt();
+        if(val > 100){
+            QMessageBox::warning(this,tr("Attention!"),
+                                 tr("Structure probably 100 %!!!\n"
+                                    "You select %1\%").arg(val));
+            break;
         }
-        //QString value = editStructure->text();
-        while(query.next()){
+        tableWidget->insertRow(row);
+        QTableWidgetItem *item1 = new QTableWidgetItem;
+        tableWidget->setItem(row,0,item1);
+        tableWidget->item(row,0)->setText(query.value(1).toString());
 
-            int val = que + query.value(2).toInt();
-            if(val > 100){
-                QMessageBox::warning(this,tr("Attention!"),
-                                     tr("Structure probably 100 %!!!\n"
-                                        "You select %1\%").arg(val));
-                break;
-            }
-            tableWidget->insertRow(row);
-            QTableWidgetItem *item1 = new QTableWidgetItem;
-            tableWidget->setItem(row,0,item1);
-            tableWidget->item(row,0)->setText(query.value(1).toString());
+        QTableWidgetItem *item2 = new QTableWidgetItem;
+        tableWidget->setItem(row,1,item2);
+        tableWidget->item(row,1)->setText(query.value(2).toString());
 
-            QTableWidgetItem *item2 = new QTableWidgetItem;
-            tableWidget->setItem(row,1,item2);
-            tableWidget->item(row,1)->setText(query.value(2).toString());
+        QTableWidgetItem *item3 = new QTableWidgetItem;
+        tableWidget->setItem(row,2,item3);
+        tableWidget->item(row,2)->setText(query.value(0).toString());
 
-            QTableWidgetItem *item3 = new QTableWidgetItem;
-            tableWidget->setItem(row,2,item3);
-            tableWidget->item(row,2)->setText(query.value(0).toString());
+        if(!value.isEmpty())
+            value += ", ";
+        value += query.value(1).toString();
+        value += " ";
+        value += query.value(2).toString();
+        value += "%";
 
-            //sortTable(1);
-
-//            if(!value.isEmpty())
-//                value += ", ";
-//            value += query.value(1).toString();
-//            value += " ";
-//            value += query.value(2).toString();
-//            value += "%";
-
-            NumPrefix numPrefix(this);
-            QString rowPrefix = numPrefix.getPrefix("structuretable");
-            QSqlQuery queryTable;
-            queryTable.prepare("INSERT INTO structuretable ("
-                          "structuretableid, structureid, materialid"
-                          ") VALUES(:structuretableid, :structureid, :materialid)");
-            queryTable.bindValue(":structuretableid",rowPrefix);
-            queryTable.bindValue(":structureid",indexTemp);
-            queryTable.bindValue(":materialid",query.value(0).toString());
-            queryTable.exec();
-        }
-        //editStructure->setText(value);
-    //}
+        NumPrefix numPrefix(this);
+        QString rowPrefix = numPrefix.getPrefix("structuretable");
+        QSqlQuery queryTable;
+        queryTable.prepare("INSERT INTO structuretable ("
+                           "structuretableid, structureid, materialid"
+                           ") VALUES(:structuretableid, :structureid, :materialid)");
+        queryTable.bindValue(":structuretableid",rowPrefix);
+        queryTable.bindValue(":structureid",indexTemp);
+        queryTable.bindValue(":materialid",query.value(0).toString());
+        queryTable.exec();
+    }
+    editStructure->setText(value);
 }
 
 void StructureForm::deleteRecordOfTable()
@@ -270,8 +273,6 @@ void StructureForm::deleteRecordOfTable()
         query.exec();
 
         tableWidget->removeRow(tableWidget->currentRow());
-
-        //sortTable(1);
         tableWidget->repaint();
     }
 }
