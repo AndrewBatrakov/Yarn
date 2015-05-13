@@ -40,8 +40,6 @@ JournalForm::JournalForm(QString id, QWidget *parent, bool onlyForRead) :
     listWidget->setIconSize(QSize(128,128));
     listWidget->setViewMode(QListView::IconMode);
 
-
-
     connect(listWidget,SIGNAL(itemDoubleClicked(QListWidgetItem*)),this,SLOT(itemClicked()));
     cancelButton = new QPushButton(tr("Cancel"));
     cancelButton->setDefault(true);
@@ -115,8 +113,11 @@ void JournalForm::editRecord()
         query.exec();
     }else{
         QSqlQuery query;
-        query.prepare("SELECT * FROM journal WHERE journalname = :name");
+        query.prepare("SELECT * FROM journal WHERE journalname = :name "
+                      "AND year = :year AND number = :number");
         query.bindValue(":name",editName->text().simplified());
+        query.bindValue(":number",editNumber->text().toInt());
+        query.bindValue(":year",editYear->text().toInt());
         query.exec();
         query.next();
         if(!query.isValid()){

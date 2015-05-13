@@ -59,14 +59,15 @@ void TegForm::editRecord()
 {
     if(indexTemp != ""){
         QSqlQuery query;
-        query.prepare("UPDATE teg SET tegname = :name WHERE tegrid = :id");
+        query.prepare("UPDATE teg SET tegname = :name, teglowname = :teglowname WHERE tegrid = :id");
         query.bindValue(":name",editForm->text());
         query.bindValue(":id",indexTemp);
+        query.bindValue(":teglowname",editForm->text().toLower());
         query.exec();
     }else{
         QSqlQuery query;
-        query.prepare("SELECT * FROM teg WHERE tegname = :name");
-        query.bindValue(":name",editForm->text().simplified());
+        query.prepare("SELECT * FROM teg WHERE teglowname = :name");
+        query.bindValue(":name",editForm->text().toLower().simplified());
         query.exec();
         query.next();
         if(!query.isValid()){
@@ -76,9 +77,10 @@ void TegForm::editRecord()
                 close();
             }else{
                 QSqlQuery query;
-                query.prepare("INSERT INTO teg (tegid, tegname) VALUES(:id, :name)");
+                query.prepare("INSERT INTO teg (tegid, tegname, teglowname) VALUES(:id, :name, :teglowname)");
                 query.bindValue(":id",indexTemp);
                 query.bindValue(":name",editForm->text().simplified());
+                query.bindValue(":teglowname",editForm->text().toLower().simplified());
                 query.exec();
             }
         }else{

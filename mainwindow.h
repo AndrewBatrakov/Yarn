@@ -41,7 +41,12 @@ private slots:
 
     void putBaseProcedure();
     void getBaseProcedure();
+    void searchProcedure();
+    void changeWidget();
+
 private:
+    QVBoxLayout *mainLayout;
+    QListWidget *listWidget;
     QWidget *panel;
     QSplitter *splitter;
 

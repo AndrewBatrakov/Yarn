@@ -8,6 +8,7 @@
 #include "firmaform.h"
 #include "getbase.h"
 #include "journalform.h"
+#include "searchform.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -282,6 +283,10 @@ void MainWindow::createPanel()
     templateModel = new QSqlRelationalTableModel(this);
     templateModel->setEditStrategy(QSqlRelationalTableModel::OnManualSubmit);
 
+    listWidget = new QListWidget;
+    listWidget->setIconSize(QSize(128,128));
+    listWidget->setViewMode(QListView::IconMode);
+
     addRecordButton = new QPushButton(tr("Add"));
     QPixmap pixAdd(":/add.png");
     addRecordButton->setIcon(pixAdd);
@@ -304,10 +309,11 @@ void MainWindow::createPanel()
     buttonBox->addWidget(editRecordButton);
     buttonBox->addStretch();
 
-    QVBoxLayout *mainLayout = new QVBoxLayout;
+    mainLayout = new QVBoxLayout;
     mainLayout->addLayout(buttonBox);
     mainLayout->addWidget(tableLabel);
     mainLayout->addWidget(tableView);
+    mainLayout->addWidget(listWidget);
     panel->setLayout(mainLayout);
     connect(tableView,SIGNAL(doubleClicked(QModelIndex)),this,SLOT(editRecordOfTable()));
 
@@ -351,6 +357,9 @@ void MainWindow::createActions()
     getAction = new QAction(tr("Get Base from FTP"),this);
     connect(getAction,SIGNAL(triggered()),this,SLOT(getBaseProcedure()));
 
+    searchAction = new QAction(tr("Search In Journal By Contens..."),this);
+    connect(searchAction,SIGNAL(triggered()),this,SLOT(searchProcedure()));
+
     //Help Action
     aboutQtAction = new QAction(tr("About Qt..."),this);
     connect(aboutQtAction,SIGNAL(triggered()),qApp,SLOT(aboutQt()));
@@ -385,6 +394,7 @@ void MainWindow::createMenu()
     serviceMenu->addAction(putAction);
     serviceMenu->addAction(getAction);
     serviceMenu->addSeparator();
+    serviceMenu->addAction(searchAction);
 
     menuBar()->addSeparator();
     helpMenu = menuBar()->addMenu(tr("Help"));
@@ -602,6 +612,10 @@ void MainWindow::deleteRecordOfTable()
 
 void MainWindow::viewTemplateTable(QString tempTable)
 {
+    listWidget->setVisible(false);
+    if(!tableView->isVisible()){
+        tableView->setVisible(true);
+    }
     if(tableView->model())
     for(int i=0; i<tableView->model()->columnCount();i++){
         QAbstractItemDelegate* delegate = tableView->itemDelegateForColumn( i );
@@ -670,6 +684,17 @@ void MainWindow::viewTemplateTable(QString tempTable)
             templateModel->setFilter(QString("journalname LIKE '%%1%'").arg(filterTable));
         }
         strivgValue = tr("Journal");
+    }else if(tempTable == "teg"){
+        templateModel->setHeaderData(1,Qt::Horizontal,tr("Name"));
+        templateModel->setHeaderData(2,Qt::Horizontal,tr("Number"));
+        templateModel->setHeaderData(3,Qt::Horizontal,tr("Year"));
+        if(setFilter){
+
+            templateModel->setTable("journalphoto");
+            templateModel->setFilter(QString("journalphotoid LIKE '%%1%'").arg("SRV000000001"));
+
+        }
+        strivgValue = tr("Teg");
     }else{
         tableView->setModel(0);
         tableLabel->clear();
@@ -799,4 +824,51 @@ void MainWindow::copyRecordOfTable()
 //            QString iD = record.value("colorid").toString();
 //    QSqlQueryModel tableModel;
 
+}
+
+void MainWindow::searchProcedure()
+{
+    QString valueTempModel = "teg";//templateModel->tableName();
+
+    SearchForm searchForm(valueTempModel, this);
+    searchForm.exec();
+    qDebug()<<searchForm.rowOut();
+    filterTable = searchForm.rowOut();
+    filterTable.toLower();
+    setFilter = true;
+
+    tableView->setVisible(false);
+    listWidget->setVisible(true);
+    listWidget->clear();
+
+    QSqlQuery query;
+    query.prepare("SELECT journalphotoid FROM tegtable WHERE tegid IN (SELECT tegid FROM teg WHERE teglowname LIKE :name)");
+    filterTable += "%";
+    query.bindValue(":name",filterTable);
+    query.exec();
+    while(query.next()){
+        QSqlQuery queryPhoto;
+        queryPhoto.prepare("SELECT * FROM journalphoto WHERE journalphotoid = :id");
+        queryPhoto.bindValue(":id",query.value(0).toString());
+        queryPhoto.exec();
+        while(queryPhoto.next()){
+            QListWidgetItem *listItem = new QListWidgetItem(listWidget);
+            QString page = tr("Page ");
+            page += queryPhoto.value(3).toString();
+            listItem->setText(page);
+            QByteArray imageByte = queryPhoto.value(2).toByteArray();
+            QImage pixMap;
+            pixMap.loadFromData(imageByte);
+            QImage re = pixMap.scaled(100,200,Qt::KeepAspectRatio,Qt::SmoothTransformation);
+            //photoLabel->setPixmap(QPixmap::fromImage(re));
+            listItem->setIcon(QPixmap::fromImage(re));
+        }
+    }
+}
+
+void MainWindow::changeWidget()
+{
+    listWidget->hide();
+    tableView = new QTableView;
+    mainLayout->addWidget(tableView);
 }

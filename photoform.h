@@ -2,6 +2,7 @@
 #define PHOTOFORM_H
 
 #include <QtWidgets>
+#include "phototeg.h"
 
 class PhotoForm : public QDialog
 {
@@ -14,7 +15,7 @@ private slots:
     void createContextMenu();
 
 private:
-    QLabel *photoLabel;
+    PhotoTeg *photoLabel;
     QString journalID;
     int pageNumber;
     int pageMax;

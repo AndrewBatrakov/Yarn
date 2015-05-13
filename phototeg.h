@@ -1,14 +1,14 @@
-#ifndef PHOTOLABEL_H
-#define PHOTOLABEL_H
+#ifndef PHOTOTEG_H
+#define PHOTOTEG_H
 
 #include <QtWidgets>
 
-class PhotoLabel : public QLabel
+class PhotoTeg : public QLabel
 {
     Q_OBJECT
 
 public:
-    PhotoLabel(QWidget *parent = 0);
+    PhotoTeg(QWidget *parent = 0);
 
 signals:
     void clicked();
@@ -17,4 +17,4 @@ protected:
     void mouseReleaseEvent(QMouseEvent *);
 };
 
-#endif // PHOTOLABEL_H
+#endif // PHOTOTEG_H

@@ -6,7 +6,7 @@ PhotoForm::PhotoForm(QString idJournal, int page, QWidget *parent) : QDialog(par
 {
     journalID = idJournal;
     pageNumber = page;
-    photoLabel  = new QLabel;
+    photoLabel  = new PhotoTeg;
 
     maxCount();
 

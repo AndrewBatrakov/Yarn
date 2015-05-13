@@ -10,7 +10,8 @@ SOURCES  += dbdirection.cpp\
     $$PWD/getbase.cpp \
     $$PWD/putbase.cpp \
     $$PWD/photolabel.cpp \
-    $$PWD/dirremote.cpp
+    $$PWD/dirremote.cpp \
+    $$PWD/phototeg.cpp
 
 HEADERS  += dbdirection.h\
             lineedit.h \
@@ -24,4 +25,5 @@ HEADERS  += dbdirection.h\
     $$PWD/getbase.h \
     $$PWD/putbase.h \
     $$PWD/photolabel.h \
-    $$PWD/dirremote.h
+    $$PWD/dirremote.h \
+    $$PWD/phototeg.h
