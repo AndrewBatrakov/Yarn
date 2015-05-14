@@ -6,7 +6,7 @@ PhotoForm::PhotoForm(QString idJournal, int page, QWidget *parent) : QDialog(par
 {
     journalID = idJournal;
     pageNumber = page;
-    photoLabel  = new PhotoTeg;
+    photoLabel  = new QLabel;
 
     maxCount();
 
@@ -29,7 +29,6 @@ PhotoForm::PhotoForm(QString idJournal, int page, QWidget *parent) : QDialog(par
     setLayout(mainLayout);
 
     setWindowTitle(tr("Pages Of Journal"));
-    //createContextMenu();
 }
 
 
@@ -68,8 +67,21 @@ void PhotoForm::mousePressEvent(QMouseEvent *mouseEvent)
         menu.setContextMenuPolicy(Qt::ActionsContextMenu);
         QAction *m = menu.exec(mouseEvent->globalPos());
         if(m){
-            TegTableForm openForm(indexTemp,this,false);
+            QSqlQuery queryPh;
+            queryPh.prepare("SELECT journalphotoid FROM journalphoto WHERE (page = :page AND journalid = :journalid)");
+            queryPh.bindValue(":page",pageNumber);
+            queryPh.bindValue(":journalid",journalID);
+            queryPh.exec();
+            queryPh.next();
+
+            QSqlQuery query;
+            query.prepare("SELECT tegtableid FROM tegtable WHERE journalphotoid = :journalphotoid");
+            query.bindValue(":journalphotoid",queryPh.value(0).toString());
+            query.exec();
+            query.next();
+            TegTableForm openForm(query.value(0).toString(),queryPh.value(0).toString(),this,false);
             openForm.exec();
+
         }
     }
 }
@@ -82,10 +94,3 @@ void PhotoForm::maxCount()
     pageMax = query.value(0).toInt();
 }
 
-void PhotoForm::createContextMenu()
-{
-//    editTag = new QAction(tr("Edit Tags For Search"),photoLabel);
-//    photoLabel->addAction(editTag);
-//    photoLabel->setContextMenuPolicy(Qt::ActionsContextMenu);
-
-}

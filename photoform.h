@@ -12,10 +12,10 @@ public:
 
 private slots:
     void maxCount();
-    void createContextMenu();
+    //void createContextMenu();
 
 private:
-    PhotoTeg *photoLabel;
+    QLabel *photoLabel;
     QString journalID;
     int pageNumber;
     int pageMax;

@@ -60,9 +60,9 @@ void TegForm::editRecord()
     if(indexTemp != ""){
         QSqlQuery query;
         query.prepare("UPDATE teg SET tegname = :name, teglowname = :teglowname WHERE tegrid = :id");
-        query.bindValue(":name",editForm->text());
+        query.bindValue(":name",editForm->text().simplified());
         query.bindValue(":id",indexTemp);
-        query.bindValue(":teglowname",editForm->text().toLower());
+        query.bindValue(":teglowname",editForm->text().toLower().simplified());
         query.exec();
     }else{
         QSqlQuery query;

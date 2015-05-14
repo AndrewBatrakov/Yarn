@@ -43,7 +43,7 @@ StructureForm::StructureForm(QString id,QWidget *parent, bool onlyForRead) : QDi
     editRecordButton->setIcon(pixEdit);
     connect(editRecordButton,SIGNAL(clicked()),this,SLOT(editRecordOfTable()));
 
-    tableWidget = new QTableWidget(0,3);
+    tableWidget = new QTableWidget(0,4);
     tableWidget->setHorizontalHeaderLabels(QStringList()<<tr("Material Name")<<tr("Persent"));
     QHeaderView *head = tableWidget->horizontalHeader();
     connect(head,SIGNAL(sectionClicked(int)),this,SLOT(sortTable(int)));
@@ -97,6 +97,10 @@ StructureForm::StructureForm(QString id,QWidget *parent, bool onlyForRead) : QDi
                     QTableWidgetItem *item2 = new QTableWidgetItem;
                     tableWidget->setItem(row,2,item2);
                     tableWidget->item(row,2)->setText(queryName.value(0).toString());
+
+                    QTableWidgetItem *item3 = new QTableWidgetItem;
+                    tableWidget->setItem(row,3,item3);
+                    tableWidget->item(row,3)->setText(queryTable.value(0).toString());
                     ++row;
                 }
             }
@@ -111,6 +115,7 @@ StructureForm::StructureForm(QString id,QWidget *parent, bool onlyForRead) : QDi
     tableWidget->setAlternatingRowColors(true);
     tableWidget->resizeColumnsToContents();
     tableWidget->setColumnHidden(2,true);
+    tableWidget->setColumnHidden(3,true);
     head->setStretchLastSection(true);
     setLayout(mainLayout);
     connect(tableWidget,SIGNAL(cellDoubleClicked(int,int)),this,SLOT(editRecordOfTable()));
@@ -268,7 +273,7 @@ void StructureForm::deleteRecordOfTable()
         int rowNow = tableWidget->currentRow();
 
         QSqlQuery query;
-        query.prepare("DELETE FROM structuretable WHERE structuretableid = :id");
+        query.prepare("DELETE FROM structuretable WHERE structuretableid = :id AND ");
         query.bindValue(":id",tableWidget->item(rowNow,2)->text());
         query.exec();
 

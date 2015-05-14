@@ -8,7 +8,7 @@ class TegTableForm : public QDialog
     Q_OBJECT
 
 public:
-    TegTableForm(QString,QWidget *,bool);
+    TegTableForm(QString, QString, QWidget *, bool);
     void done(int result);
     QString rowOut() const {return indexTemp;};
 

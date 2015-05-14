@@ -42,6 +42,7 @@ private:
     QDialogButtonBox *buttonBox;
 
     QString indexTemp;
+    QString structureTableId;
 
     QPushButton *addRecordButton;
     QPushButton *editRecordButton;

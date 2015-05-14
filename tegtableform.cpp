@@ -2,11 +2,13 @@
 #include "numprefix.h"
 #include <QtSql>
 #include "viewlisttable.h"
+#include "tegform.h"
 
-TegTableForm::TegTableForm(QString iD, QWidget *parent, bool onlyForRead) : QDialog(parent)
+TegTableForm::TegTableForm(QString iD, QString idPhoto, QWidget *parent, bool onlyForRead) : QDialog(parent)
 {
     readSettings();
-    indexJournalPhoto = iD;
+    indexTemp = iD;
+    indexJournalPhoto = idPhoto;
 
     saveButton = new QPushButton(tr("Save"));
     connect(saveButton,SIGNAL(clicked()),this,SLOT(saveRecord()));
@@ -58,18 +60,17 @@ TegTableForm::TegTableForm(QString iD, QWidget *parent, bool onlyForRead) : QDia
     if(!onlyForRead){
         mainLayout->addWidget(buttonBox,3,1);
     }
-    if(indexJournalPhoto != ""){
+    if(indexTemp != ""){
         QSqlQuery query;
-        query.prepare("SELECT * FROM tegtable WHERE journalphotoid = ?");
-        query.addBindValue(indexJournalPhoto);
+        query.prepare("SELECT * FROM tegtable WHERE journalphotoid = :journalphotoid");
+        query.bindValue(":journalphotoid",indexJournalPhoto);
+        //query.bindValue(":id",indexTemp);
         query.exec();
         int row = 0;
         while(query.next()){
-            indexTemp = query.value(0).toString();
-            qDebug()<<indexTemp;
             QSqlQuery queryTable;
             queryTable.prepare("SELECT * FROM teg WHERE tegid = :id");
-            queryTable.bindValue(":id",indexTemp);
+            queryTable.bindValue(":id",query.value(1).toString());
             queryTable.exec();
 
             while(queryTable.next()){
@@ -84,6 +85,9 @@ TegTableForm::TegTableForm(QString iD, QWidget *parent, bool onlyForRead) : QDia
                 ++row;
             }
         }
+    }else{
+        NumPrefix numPrefix(this);
+        indexTemp = numPrefix.getPrefix("tegtable");
     }
     tableWidget->setAlternatingRowColors(true);
     tableWidget->resizeColumnsToContents();
@@ -121,11 +125,21 @@ void TegTableForm::addRecordOfTable()
     viewListTable.exec();
     QString rr = viewListTable.rowOut();
 
+    int row = tableWidget->rowCount();
+    for(int i = 0; i < row; ++i){
+        qDebug()<<tableWidget->item(i,1)->text();
+        if(rr == tableWidget->item(i,1)->text()){
+
+            QMessageBox::warning(this,tr("Attention!"),tr("%1 is present in tegs!").arg(tableWidget->item(i,0)->text()));
+            return;
+        }
+    }
+
     QSqlQuery query;
     query.prepare("SELECT * FROM teg WHERE tegid = :id");
     query.bindValue(":id",rr);
     query.exec();
-    int row = tableWidget->rowCount();
+
     while(query.next()){
 
         tableWidget->insertRow(row);
@@ -137,43 +151,80 @@ void TegTableForm::addRecordOfTable()
         tableWidget->setItem(row,1,item3);
         tableWidget->item(row,1)->setText(query.value(0).toString());
 
-        NumPrefix numPrefix(this);
-        QString rowPrefix = numPrefix.getPrefix("tegtable");
         QSqlQuery queryTable;
         queryTable.prepare("INSERT INTO tegtable ("
                            "tegtableid, tegid, journalphotoid"
                            ") VALUES(:tegtableid, :tegid, :journalphotoid)");
-        queryTable.bindValue(":tegtableid",rowPrefix);
+        queryTable.bindValue(":tegtableid",indexTemp);
         queryTable.bindValue(":tegid",query.value(0).toString());
         queryTable.bindValue(":journalphotoid",indexJournalPhoto);
         queryTable.exec();
     }
-    //editStructure->setText(value);
+    tableWidget->repaint();
 }
 
 void TegTableForm::deleteRecordOfTable()
 {
+    int que = QMessageBox::warning(this,tr("Attention!"),
+                                   tr("Really delete?"),
+                                   QMessageBox::Yes|QMessageBox::No,QMessageBox::No);
+    if(que == QMessageBox::Yes){
+        int rowNow = tableWidget->currentRow();
 
+        QSqlQuery query;
+        query.prepare("DELETE FROM tegtable WHERE tegtableid = :id");
+        query.bindValue(":id",indexTemp);
+        query.exec();
+
+        tableWidget->removeRow(tableWidget->currentRow());
+        tableWidget->repaint();
+    }
 }
 
 void TegTableForm::editRecordOfTable()
 {
+    int rowNow = tableWidget->currentRow();
+    qDebug()<<tableWidget->item(rowNow,1)->text();
+    TegForm openForm(tableWidget->item(rowNow,0)->text(),this,false);
+    openForm.exec();
+    QString tegID = openForm.rowOut();
 
+    QSqlQuery query;
+    query.prepare("SELECT * FROM teg WHERE tegid = :id");
+    query.bindValue(":id",tegID);
+    query.exec();
+    while(query.next()){
+        //tableWidget->insertRow(row);
+        QTableWidgetItem *item1 = new QTableWidgetItem;
+        tableWidget->setItem(rowNow,0,item1);
+        tableWidget->item(rowNow,0)->setText(query.value(1).toString());
+
+        QTableWidgetItem *item3 = new QTableWidgetItem;
+        tableWidget->setItem(rowNow,1,item3);
+        tableWidget->item(rowNow,1)->setText(query.value(0).toString());
+
+        //sortTable(1);
+        tableWidget->setColumnHidden(1,true);
+        tableWidget->repaint();
+    }
 }
 
 void TegTableForm::readSettings()
 {
-
+    QSettings settings("AO_Batrakov_Inc.", "Yarn");
+    restoreGeometry(settings.value("TegTable").toByteArray());
 }
 
 void TegTableForm::writeSettings()
 {
-
+    QSettings settings("AO_Batrakov_Inc.", "Yarn");
+    settings.setValue("TegTable", saveGeometry());
 }
 
-void TegTableForm::sortTable(int)
+void TegTableForm::sortTable(int index)
 {
-
+    tableWidget->setSortingEnabled(true);
+    tableWidget->sortByColumn(index,Qt::AscendingOrder);
 }
 
 void TegTableForm::done(int result)
