@@ -233,14 +233,14 @@ void JournalForm::addPhoto()
     QString fileName = QFileDialog::getOpenFileName(this,tr("Open File"),"",tr("Images (*.jpg *.gif *.png)"));
     QFile file(fileName);
     if(file.open(QIODevice::ReadOnly)){
-        if(file.size() > 300000){
-            int que = QMessageBox::warning(this,tr("Attention!"),
-                                           tr("File size - %1 ,\nAre You sure?").arg(QString::number(file.size())),
-                                           QMessageBox::Yes|QMessageBox::No,QMessageBox::No);
-            if(que == QMessageBox::No){
-                return;
-            }
-        }
+//        if(file.size() > 300000){
+//            int que = QMessageBox::warning(this,tr("Attention!"),
+//                                           tr("File size - %1 ,\nAre You sure?").arg(QString::number(file.size())),
+//                                           QMessageBox::Yes|QMessageBox::No,QMessageBox::No);
+//            if(que == QMessageBox::No){
+//                return;
+//            }
+//        }
         QImage pixMap;
         pixMap.load(fileName);
         QImage re = pixMap.scaled(600,800,Qt::KeepAspectRatio,Qt::SmoothTransformation);

@@ -7,7 +7,7 @@ GetBase::GetBase(QWidget *parent) : QDialog(parent)
 void GetBase::getBaseHttp()
 {
     progressDialog = new QProgressDialog(this);
-    fileHttp = new QFile("../Yarn.dat");
+    fileHttp = new QFile("Yarn.dat");
     fileHttp->open(QIODevice::WriteOnly);
     url = "http://91.102.219.74/QtProject/Yarn/Base/Yarn.dat";
     //url = "http://91.102.219.74/QtProject/Yarn/Yarn.exe";
