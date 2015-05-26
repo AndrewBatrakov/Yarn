@@ -160,6 +160,18 @@ void StructureForm::deleteRecord()
 
 void StructureForm::saveRecord()
 {
+    int que = 0;
+    int row = tableWidget->rowCount();
+    for(int val = 0; val < row; ++val){
+        que = que + tableWidget->item(val,1)->text().toInt() ;
+        qDebug()<<que<<" - "<<tableWidget->item(val,1)->text();
+    }
+    qDebug()<<que<<" - ";
+    if(que < 100){
+        QMessageBox::warning(this,tr("Attention!"),tr("Structure probably 100 %!!!\n"
+                                                      "You select %1\%").arg(que));
+        return;
+    }
     editStructure->clear();
     tableWidget->sortByColumn(1,Qt::DescendingOrder);
     QString value = "";// = editStructure->text();
@@ -193,7 +205,7 @@ void StructureForm::cancelRecord()
     for(int row; row < tableWidget->rowCount(); ++row){
         QSqlQuery query;
         query.prepare("DELETE FROM structuretable WHERE structuretableid = :id");
-        query.bindValue(":id",tableWidget->item(row,2)->text());
+        query.bindValue(":id",tableWidget->item(row,3)->text());
         query.exec();
     }
     indexTemp = "";
@@ -252,6 +264,11 @@ void StructureForm::addRecordOfTable()
 
         NumPrefix numPrefix(this);
         QString rowPrefix = numPrefix.getPrefix("structuretable");
+
+        QTableWidgetItem *item4 = new QTableWidgetItem;
+        tableWidget->setItem(row,3,item4);
+        tableWidget->item(row,3)->setText(rowPrefix);
+
         QSqlQuery queryTable;
         queryTable.prepare("INSERT INTO structuretable ("
                            "structuretableid, structureid, materialid"
@@ -273,8 +290,8 @@ void StructureForm::deleteRecordOfTable()
         int rowNow = tableWidget->currentRow();
 
         QSqlQuery query;
-        query.prepare("DELETE FROM structuretable WHERE structuretableid = :id AND ");
-        query.bindValue(":id",tableWidget->item(rowNow,2)->text());
+        query.prepare("DELETE FROM structuretable WHERE structuretableid = :id");
+        query.bindValue(":id",tableWidget->item(rowNow,3)->text());
         query.exec();
 
         tableWidget->removeRow(tableWidget->currentRow());

@@ -3,18 +3,26 @@
 
 #include <QtWidgets>
 #include "phototeg.h"
+#include "lineedit.h"
 
 class PhotoForm : public QDialog
 {
     Q_OBJECT
 public:
-    PhotoForm(QString, int, QWidget *);
+    PhotoForm(QString, int, QWidget *, bool);
 
 private slots:
     void maxCount();
-    //void createContextMenu();
+    void editRecord();
 
 private:
+    QLabel *pageLabel;
+    LineEdit *pageEdit;
+    bool yesEdit;
+    QPushButton *saveButton;
+    QPushButton *cancelButton;
+    QDialogButtonBox *buttonBox;
+
     QLabel *photoLabel;
     QString journalID;
     int pageNumber;

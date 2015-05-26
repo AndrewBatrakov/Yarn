@@ -2,8 +2,9 @@
 #include <QtSql>
 #include "tegtableform.h"
 
-PhotoForm::PhotoForm(QString idJournal, int page, QWidget *parent) : QDialog(parent)
+PhotoForm::PhotoForm(QString idJournal, int page, QWidget *parent, bool edit) : QDialog(parent)
 {
+    yesEdit = edit;
     journalID = idJournal;
     pageNumber = page;
     photoLabel  = new QLabel;
@@ -17,6 +18,25 @@ PhotoForm::PhotoForm(QString idJournal, int page, QWidget *parent) : QDialog(par
     query.exec();
     query.next();
 
+    if(yesEdit){
+        pageLabel = new QLabel(tr("Page:"));
+        pageEdit = new LineEdit;
+        pageEdit->setText(QString::number(pageNumber));
+
+        saveButton = new QPushButton(tr("Save"));
+        connect(saveButton,SIGNAL(clicked()),this,SLOT(editRecord()));
+        saveButton->setToolTip(tr("Save And Close Button"));
+
+        cancelButton = new QPushButton(tr("Cancel"));
+        cancelButton->setDefault(true);
+        cancelButton->setStyleSheet("QPushButton:hover {color: red}");
+        connect(cancelButton,SIGNAL(clicked()),this,SLOT(close()));
+        cancelButton->setToolTip(tr("Cancel Button"));
+
+        buttonBox = new QDialogButtonBox;
+        buttonBox->addButton(cancelButton,QDialogButtonBox::ActionRole);
+        buttonBox->addButton(saveButton,QDialogButtonBox::ActionRole);
+    }
     indexTemp = query.value(1).toString();
     QByteArray imageByte = query.value(0).toByteArray();
     QImage pixMap;
@@ -24,8 +44,14 @@ PhotoForm::PhotoForm(QString idJournal, int page, QWidget *parent) : QDialog(par
     //QImage re = pixMap.scaled(100,200,Qt::KeepAspectRatio,Qt::SmoothTransformation);
     photoLabel->setPixmap(QPixmap::fromImage(pixMap));
 
-    QGridLayout *mainLayout = new QGridLayout;
+    QVBoxLayout *mainLayout = new QVBoxLayout;
     mainLayout->addWidget(photoLabel);
+    if(yesEdit){
+        mainLayout->addWidget(pageLabel);
+        mainLayout->addWidget(pageEdit);
+        mainLayout->addWidget(cancelButton);
+        mainLayout->addWidget(saveButton);
+    }
     setLayout(mainLayout);
 
     setWindowTitle(tr("Pages Of Journal"));
@@ -34,6 +60,7 @@ PhotoForm::PhotoForm(QString idJournal, int page, QWidget *parent) : QDialog(par
 
 void PhotoForm::mousePressEvent(QMouseEvent *mouseEvent)
 {
+    if(!yesEdit){
     if(mouseEvent->button() == Qt::LeftButton){
         if(mouseEvent->localPos().x() < size().width()/2){
             if(--pageNumber == 0)
@@ -84,6 +111,7 @@ void PhotoForm::mousePressEvent(QMouseEvent *mouseEvent)
 
         }
     }
+    }
 }
 
 void PhotoForm::maxCount()
@@ -94,3 +122,14 @@ void PhotoForm::maxCount()
     pageMax = query.value(0).toInt();
 }
 
+void PhotoForm::editRecord()
+{
+    pageNumber = pageEdit->text().toInt();
+    QSqlQuery queryPh;
+    queryPh.prepare("UPDATE journalphoto SET page = :page WHERE journalid = :journalid");
+    queryPh.bindValue(":page",pageNumber);
+    queryPh.bindValue(":journalid",journalID);
+    queryPh.exec();
+    queryPh.next();
+    close();
+}

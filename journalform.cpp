@@ -201,7 +201,9 @@ void JournalForm::writeSettings()
 
 void JournalForm::itemClicked()
 {
-    PhotoForm photoForm(indexTemp, (listWidget->currentRow() + 1),this);
+    QString tt = listWidget->item(listWidget->currentRow())->text();
+    int page = tt.mid(5).toInt();
+    PhotoForm photoForm(indexTemp, page,this,false);
     photoForm.exec();
 }
 
@@ -283,10 +285,26 @@ void JournalForm::addPhoto()
 
 void JournalForm::editPhoto()
 {
-
+    QString tt = listWidget->item(listWidget->currentRow())->text();
+    int page = tt.mid(5).toInt();
+    PhotoForm photoForm(indexTemp, page,this,true);
+    photoForm.exec();
+    listWidget->repaint();
 }
 
 void JournalForm::deletePhoto()
 {
-
+    int k = QMessageBox::warning(this,tr("Attention!!!"),tr("Really Delete Page Photo?"),
+                                 QMessageBox::No|QMessageBox::Yes,QMessageBox::No);
+    if(k == QMessageBox::Yes){
+        QString tt = listWidget->item(listWidget->currentRow())->text();
+        int page = tt.mid(5).toInt();
+        QSqlQuery queryPh;
+        queryPh.prepare("DELETE FROM journalphoto WHERE (journalid = :journalid AND page = :page)");
+        queryPh.bindValue(":page",page);
+        queryPh.bindValue(":journalid",indexTemp);
+        queryPh.exec();
+        queryPh.next();
+        listWidget->repaint();
+    }
 }

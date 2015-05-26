@@ -172,10 +172,10 @@ void TegTableForm::deleteRecordOfTable()
         int rowNow = tableWidget->currentRow();
 
         QSqlQuery query;
-        query.prepare("DELETE FROM tegtable WHERE tegtableid = :id");
-        query.bindValue(":id",indexTemp);
+        query.prepare("DELETE FROM tegtable WHERE tegid = :id");
+        query.bindValue(":id",tableWidget->item(rowNow,1)->text());
         query.exec();
-
+        qDebug()<<tableWidget->item(rowNow,1)->text()<<" - "<<tableWidget->item(rowNow,0)->text();;
         tableWidget->removeRow(tableWidget->currentRow());
         tableWidget->repaint();
     }

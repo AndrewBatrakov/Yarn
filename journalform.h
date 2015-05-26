@@ -48,6 +48,7 @@ private:
     QDialogButtonBox *buttonBox;
 
     QString indexTemp;
+    int pageNumber;
 };
 
 #endif // JOURNALFORM_H
