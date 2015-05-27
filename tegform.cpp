@@ -12,8 +12,8 @@ TegForm::TegForm(QString id, QWidget *parent, bool onlyForRead) :
     labelForm = new QLabel(tr("Name:"));
     editForm = new LineEdit;
     editForm->setReadOnly(onlyForRead);
-    QRegExp regExp("[\\x0410-\\x044f 0-9 \" -]{150}");
-    editForm->setValidator(new QRegExpValidator(regExp,this));
+    //QRegExp regExp("[\\x0410-\\x044f 0-9 \" -]{150}");
+    //editForm->setValidator(new QRegExpValidator(regExp,this));
     labelForm->setBuddy(editForm);
 
     saveButton = new QPushButton(tr("Save"));
@@ -59,7 +59,7 @@ void TegForm::editRecord()
 {
     if(indexTemp != ""){
         QSqlQuery query;
-        query.prepare("UPDATE teg SET tegname = :name, teglowname = :teglowname WHERE tegrid = :id");
+        query.prepare("UPDATE teg SET tegname = :name, teglowname = :teglowname WHERE tegid = :id");
         query.bindValue(":name",editForm->text().simplified());
         query.bindValue(":id",indexTemp);
         query.bindValue(":teglowname",editForm->text().toLower().simplified());

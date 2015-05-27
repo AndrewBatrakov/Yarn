@@ -37,7 +37,7 @@ JournalForm::JournalForm(QString id, QWidget *parent, bool onlyForRead) :
 
     listWidget = new QListWidget(this);
 
-    listWidget->setIconSize(QSize(128,128));
+    listWidget->setIconSize(QSize(300,400));
     listWidget->setViewMode(QListView::IconMode);
 
     connect(listWidget,SIGNAL(itemDoubleClicked(QListWidgetItem*)),this,SLOT(itemClicked()));
@@ -64,15 +64,18 @@ JournalForm::JournalForm(QString id, QWidget *parent, bool onlyForRead) :
             queryPhoto.prepare("SELECT * FROM journalphoto WHERE journalid = :id");
             queryPhoto.bindValue(":id",indexTemp);
             queryPhoto.exec();
+
+            QByteArray imageByte;
+            QImage pixMap;
+            QImage re;
             while(queryPhoto.next()){
                 QListWidgetItem *listItem = new QListWidgetItem(listWidget);
                 QString page = tr("Page ");
-                page += queryPhoto.value(3).toString();
+                page += queryPhoto.value(4).toString();
                 listItem->setText(page);
-                QByteArray imageByte = queryPhoto.value(2).toByteArray();
-                QImage pixMap;
+                imageByte = queryPhoto.value(2).toByteArray();
                 pixMap.loadFromData(imageByte);
-                QImage re = pixMap.scaled(100,200,Qt::KeepAspectRatio,Qt::SmoothTransformation);
+                re = pixMap.scaled(300,400,Qt::KeepAspectRatio,Qt::SmoothTransformation);
                 //photoLabel->setPixmap(QPixmap::fromImage(re));
                 listItem->setIcon(QPixmap::fromImage(re));
             }
@@ -277,7 +280,7 @@ void JournalForm::addPhoto()
         QString page = tr("Page ");
         page += QString::number(pageNum);
         listItem->setText(page);
-        QImage reToItem = pixMap.scaled(100,200,Qt::KeepAspectRatio,Qt::SmoothTransformation);
+        QImage reToItem = pixMap.scaled(300,400,Qt::KeepAspectRatio,Qt::SmoothTransformation);
         listItem->setIcon(QPixmap::fromImage(reToItem));
         listWidget->repaint();
     }

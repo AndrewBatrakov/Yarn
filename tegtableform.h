@@ -16,10 +16,7 @@ public slots:
     void deleteRecord();
 
 private slots:
-    void editRecord();
-
     void saveRecord();
-    void cancelRecord();
 
     void addRecordOfTable();
     void deleteRecordOfTable();

@@ -101,22 +101,15 @@ TegTableForm::TegTableForm(QString iD, QString idPhoto, QWidget *parent, bool on
 
 void TegTableForm::deleteRecord()
 {
-
-}
-
-void TegTableForm::editRecord()
-{
-
+    QSqlQuery query;
+    query.prepare("DELETE FROM tegtable WHERE tegtableid = :id");
+    query.bindValue(":id",indexTemp);
+    query.exec();
 }
 
 void TegTableForm::saveRecord()
 {
-
-}
-
-void TegTableForm::cancelRecord()
-{
-
+    emit accept();
 }
 
 void TegTableForm::addRecordOfTable()
@@ -127,7 +120,7 @@ void TegTableForm::addRecordOfTable()
 
     int row = tableWidget->rowCount();
     for(int i = 0; i < row; ++i){
-        qDebug()<<tableWidget->item(i,1)->text();
+        //qDebug()<<tableWidget->item(i,1)->text();
         if(rr == tableWidget->item(i,1)->text()){
 
             QMessageBox::warning(this,tr("Attention!"),tr("%1 is present in tegs!").arg(tableWidget->item(i,0)->text()));
@@ -175,7 +168,7 @@ void TegTableForm::deleteRecordOfTable()
         query.prepare("DELETE FROM tegtable WHERE tegid = :id");
         query.bindValue(":id",tableWidget->item(rowNow,1)->text());
         query.exec();
-        qDebug()<<tableWidget->item(rowNow,1)->text()<<" - "<<tableWidget->item(rowNow,0)->text();;
+        //qDebug()<<tableWidget->item(rowNow,1)->text()<<" - "<<tableWidget->item(rowNow,0)->text();;
         tableWidget->removeRow(tableWidget->currentRow());
         tableWidget->repaint();
     }
@@ -184,8 +177,8 @@ void TegTableForm::deleteRecordOfTable()
 void TegTableForm::editRecordOfTable()
 {
     int rowNow = tableWidget->currentRow();
-    qDebug()<<tableWidget->item(rowNow,1)->text();
-    TegForm openForm(tableWidget->item(rowNow,0)->text(),this,false);
+    //qDebug()<<tableWidget->item(rowNow,1)->text();
+    TegForm openForm(tableWidget->item(rowNow,1)->text(),this,false);
     openForm.exec();
     QString tegID = openForm.rowOut();
 
