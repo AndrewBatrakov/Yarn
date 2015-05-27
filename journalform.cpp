@@ -305,6 +305,7 @@ void JournalForm::deletePhoto()
         queryPh.bindValue(":journalid",indexTemp);
         queryPh.exec();
         queryPh.next();
+        listWidget->clear();
         listWidget->repaint();
     }
 }
