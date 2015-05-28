@@ -269,7 +269,7 @@ void ViewListTable::viewTemplateTable(QString)
         templateModel->setHeaderData(1,Qt::Horizontal,tr("Name"));
         labelName = tr("Teg");
         if(setFilter){
-            templateModel->setFilter(QString("tegname LIKE '%%1%'").arg(filterTable));
+            templateModel->setFilter(QString("teglowname LIKE '%%1%'").arg(filterTable));
         }
     }
     templateModel->setSort(1,Qt::AscendingOrder);

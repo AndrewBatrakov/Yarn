@@ -39,6 +39,7 @@ JournalForm::JournalForm(QString id, QWidget *parent, bool onlyForRead) :
 
     listWidget->setIconSize(QSize(300,400));
     listWidget->setViewMode(QListView::IconMode);
+    listWidget->setAlternatingRowColors(true);
 
     connect(listWidget,SIGNAL(itemDoubleClicked(QListWidgetItem*)),this,SLOT(itemClicked()));
     cancelButton = new QPushButton(tr("Cancel"));
@@ -101,6 +102,7 @@ JournalForm::JournalForm(QString id, QWidget *parent, bool onlyForRead) :
     setWindowTitle(tr("Journal"));
 
     createContextMenu();
+    //connect(listWidget,SIGNAL())
 }
 
 void JournalForm::editRecord()
@@ -311,4 +313,13 @@ void JournalForm::deletePhoto()
         listWidget->clear();
         listWidget->repaint();
     }
+}
+
+void JournalForm::resizeEvent(QResizeEvent *event)
+{
+    qDebug()<<event;
+    //listWidget->clear();
+    listWidget->setFlow(QListView::LeftToRight);
+    listWidget->repaint();
+    //listWidget->update();
 }

@@ -49,6 +49,9 @@ private:
 
     QString indexTemp;
     int pageNumber;
+
+protected:
+    void resizeEvent(QResizeEvent *);
 };
 
 #endif // JOURNALFORM_H

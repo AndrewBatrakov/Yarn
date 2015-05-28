@@ -832,7 +832,6 @@ void MainWindow::searchProcedure()
 
     SearchForm searchForm(valueTempModel, this);
     searchForm.exec();
-    qDebug()<<searchForm.rowOut();
     filterTable = searchForm.rowOut();
     filterTable.toLower();
     setFilter = true;
@@ -854,12 +853,12 @@ void MainWindow::searchProcedure()
         while(queryPhoto.next()){
             QListWidgetItem *listItem = new QListWidgetItem(listWidget);
             QString page = tr("Page ");
-            page += queryPhoto.value(3).toString();
+            page += queryPhoto.value(4).toString();
             listItem->setText(page);
             QByteArray imageByte = queryPhoto.value(2).toByteArray();
             QImage pixMap;
             pixMap.loadFromData(imageByte);
-            QImage re = pixMap.scaled(100,200,Qt::KeepAspectRatio,Qt::SmoothTransformation);
+            QImage re = pixMap.scaled(300,400,Qt::KeepAspectRatio,Qt::SmoothTransformation);
             //photoLabel->setPixmap(QPixmap::fromImage(re));
             listItem->setIcon(QPixmap::fromImage(re));
         }
