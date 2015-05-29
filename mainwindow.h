@@ -42,7 +42,7 @@ private slots:
     void putBaseProcedure();
     void getBaseProcedure();
     void searchProcedure();
-    void changeWidget();
+    void readItem();
 
 private:
     QVBoxLayout *mainLayout;
@@ -99,6 +99,7 @@ private:
 
 protected:
     void closeEvent(QCloseEvent *);
+    void resizeEvent(QResizeEvent *);
 };
 
 #endif // MAINWINDOW_H

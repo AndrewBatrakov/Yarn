@@ -208,7 +208,7 @@ void JournalForm::itemClicked()
 {
     QString tt = listWidget->item(listWidget->currentRow())->text();
     int page = tt.mid(5).toInt();
-    PhotoForm photoForm(indexTemp, page,this,false);
+    PhotoForm photoForm(indexTemp, page,this,false,false);
     photoForm.exec();
 }
 
@@ -250,11 +250,18 @@ void JournalForm::addPhoto()
 //        }
         QImage pixMap;
         pixMap.load(fileName);
+        //Photo
         QImage re = pixMap.scaled(600,800,Qt::KeepAspectRatio,Qt::SmoothTransformation);
         QByteArray imageByte;
         QBuffer buffer(&imageByte);
         buffer.open(QIODevice::WriteOnly);
         re.save(&buffer, "PNG"); // writes image into ba in PNG format
+
+        QImage icon = pixMap.scaled(300,400,Qt::KeepAspectRatio,Qt::SmoothTransformation);
+        QByteArray imageByteIcon;
+        QBuffer bufferIcon(&imageByteIcon);
+        bufferIcon.open(QIODevice::WriteOnly);
+        icon.save(&bufferIcon, "PNG"); // writes image into ba in PNG format
 
         QSqlQuery queryPhotoControl;
         queryPhotoControl.prepare("SELECT COUNT(*) FROM journalphoto WHERE journalid = :id");
@@ -265,13 +272,14 @@ void JournalForm::addPhoto()
         ++pageNum;
         QSqlQuery queryPhoto;
         queryPhoto.prepare("INSERT INTO journalphoto (journalphotoid, journalid, "
-                           "journalphoto, page) VALUES("
-                           ":journalphotoid, :journalid, :journalphoto, :page)"
+                           "journalphoto, journalicon, page) VALUES("
+                           ":journalphotoid, :journalid, :journalphoto, :journalicon, :page)"
                            );
         queryPhoto.bindValue(":journalid",indexTemp);
 
 
         queryPhoto.bindValue(":journalphoto",imageByte);
+        queryPhoto.bindValue(":journalicon",imageByteIcon);
         NumPrefix numPrefix(this);
         QString valID = numPrefix.getPrefix("journalphoto");
         queryPhoto.bindValue(":journalphotoid",valID);
@@ -292,7 +300,7 @@ void JournalForm::editPhoto()
 {
     QString tt = listWidget->item(listWidget->currentRow())->text();
     int page = tt.mid(5).toInt();
-    PhotoForm photoForm(indexTemp, page,this,true);
+    PhotoForm photoForm(indexTemp, page,this,true,false);
     photoForm.exec();
     listWidget->repaint();
 }
@@ -317,9 +325,6 @@ void JournalForm::deletePhoto()
 
 void JournalForm::resizeEvent(QResizeEvent *event)
 {
-    qDebug()<<event;
-    //listWidget->clear();
     listWidget->setFlow(QListView::LeftToRight);
     listWidget->repaint();
-    //listWidget->update();
 }

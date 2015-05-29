@@ -164,9 +164,8 @@ void StructureForm::saveRecord()
     int row = tableWidget->rowCount();
     for(int val = 0; val < row; ++val){
         que = que + tableWidget->item(val,1)->text().toInt() ;
-        qDebug()<<que<<" - "<<tableWidget->item(val,1)->text();
+
     }
-    qDebug()<<que<<" - ";
     if(que < 100){
         QMessageBox::warning(this,tr("Attention!"),tr("Structure probably 100 %!!!\n"
                                                       "You select %1\%").arg(que));

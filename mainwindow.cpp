@@ -9,6 +9,7 @@
 #include "getbase.h"
 #include "journalform.h"
 #include "searchform.h"
+#include "photoform.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -284,8 +285,11 @@ void MainWindow::createPanel()
     templateModel->setEditStrategy(QSqlRelationalTableModel::OnManualSubmit);
 
     listWidget = new QListWidget;
-    listWidget->setIconSize(QSize(128,128));
+    listWidget->setIconSize(QSize(300,400));
     listWidget->setViewMode(QListView::IconMode);
+    listWidget->setStyleSheet("QListView {background: #808080} "
+                              "QListView::item:!disabled:active:!selected {"
+                              "color: yellow;}"); //почти darkblue
 
     addRecordButton = new QPushButton(tr("Add"));
     QPixmap pixAdd(":/add.png");
@@ -316,6 +320,7 @@ void MainWindow::createPanel()
     mainLayout->addWidget(listWidget);
     panel->setLayout(mainLayout);
     connect(tableView,SIGNAL(doubleClicked(QModelIndex)),this,SLOT(editRecordOfTable()));
+    connect(listWidget,SIGNAL(doubleClicked(QModelIndex)),this,SLOT(readItem()));
 
     splitterCreate();
 
@@ -833,41 +838,67 @@ void MainWindow::searchProcedure()
     SearchForm searchForm(valueTempModel, this);
     searchForm.exec();
     filterTable = searchForm.rowOut();
-    filterTable.toLower();
-    setFilter = true;
 
-    tableView->setVisible(false);
-    listWidget->setVisible(true);
-    listWidget->clear();
+    if(filterTable != ""){
+        filterTable.toLower();
+        setFilter = true;
 
-    QSqlQuery query;
-    query.prepare("SELECT journalphotoid FROM tegtable WHERE tegid IN (SELECT tegid FROM teg WHERE teglowname LIKE :name)");
-    filterTable += "%";
-    query.bindValue(":name",filterTable);
-    query.exec();
-    while(query.next()){
-        QSqlQuery queryPhoto;
-        queryPhoto.prepare("SELECT * FROM journalphoto WHERE journalphotoid = :id");
-        queryPhoto.bindValue(":id",query.value(0).toString());
-        queryPhoto.exec();
-        while(queryPhoto.next()){
-            QListWidgetItem *listItem = new QListWidgetItem(listWidget);
-            QString page = tr("Page ");
-            page += queryPhoto.value(4).toString();
-            listItem->setText(page);
-            QByteArray imageByte = queryPhoto.value(2).toByteArray();
-            QImage pixMap;
-            pixMap.loadFromData(imageByte);
-            QImage re = pixMap.scaled(300,400,Qt::KeepAspectRatio,Qt::SmoothTransformation);
-            //photoLabel->setPixmap(QPixmap::fromImage(re));
-            listItem->setIcon(QPixmap::fromImage(re));
+        tableView->setVisible(false);
+        listWidget->setVisible(true);
+        listWidget->clear();
+
+        QSqlQuery query;
+        query.prepare("SELECT journalphotoid FROM tegtable WHERE tegid IN (SELECT tegid FROM teg WHERE teglowname LIKE :name)");
+        filterTable += "%";
+        query.bindValue(":name",filterTable);
+        query.exec();
+        qDebug()<<filterTable;
+        while(query.next()){
+            QSqlQuery queryPhoto;
+            queryPhoto.prepare("SELECT * FROM journalphoto WHERE journalphotoid = :id");
+            queryPhoto.bindValue(":id",query.value(0).toString());
+            queryPhoto.exec();
+            while(queryPhoto.next()){
+                QListWidgetItem *listItem = new QListWidgetItem(listWidget);
+                QSqlQuery queryJor;
+                queryJor.prepare("SELECT * FROM journal WHERE journalid = :id");
+                queryJor.bindValue(":id",queryPhoto.value(1).toString());
+                queryJor.exec();
+                queryJor.next();
+                QString page = queryJor.value(3).toString();
+                page += " №";
+                page += queryJor.value(2).toString();
+                page += tr(" page ");
+                page += queryPhoto.value(4).toString();
+                listItem->setText(page);
+                QByteArray imageByte = queryPhoto.value(2).toByteArray();
+                QImage pixMap;
+                pixMap.loadFromData(imageByte);
+                QImage re = pixMap.scaled(300,400,Qt::KeepAspectRatio,Qt::SmoothTransformation);
+                listItem->setIcon(QPixmap::fromImage(re));
+            }
         }
     }
 }
 
-void MainWindow::changeWidget()
+void MainWindow::resizeEvent(QResizeEvent *event)
 {
-    listWidget->hide();
-    tableView = new QTableView;
-    mainLayout->addWidget(tableView);
+    listWidget->setFlow(QListView::LeftToRight);
+    listWidget->repaint();
+}
+
+void MainWindow::readItem()
+{
+    QString tt = listWidget->item(listWidget->currentRow())->text();
+    int page = tt.right(2).simplified().toInt();
+    int year = tt.left(4).toInt();
+    int number = tt.mid((tt.indexOf("№") + 1),2).simplified().toInt();
+    QSqlQuery queryJ;
+    queryJ.prepare("SELECT journalid FROM journal WHERE year = :year AND number = :number");
+    queryJ.bindValue(":year",year);
+    queryJ.bindValue(":number",number);
+    queryJ.exec();
+    queryJ.next();
+    PhotoForm formOpen(queryJ.value(0).toString(),page,this,true,true);
+    formOpen.exec();
 }

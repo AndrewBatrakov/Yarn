@@ -2,7 +2,7 @@
 #include <QtSql>
 #include "tegtableform.h"
 
-PhotoForm::PhotoForm(QString idJournal, int page, QWidget *parent, bool edit) : QDialog(parent)
+PhotoForm::PhotoForm(QString idJournal, int page, QWidget *parent, bool edit,bool readOnly) : QDialog(parent)
 {
     yesEdit = edit;
     journalID = idJournal;
@@ -18,7 +18,7 @@ PhotoForm::PhotoForm(QString idJournal, int page, QWidget *parent, bool edit) : 
     query.exec();
     query.next();
 
-    if(yesEdit){
+    if(yesEdit && !readOnly){
         pageLabel = new QLabel(tr("Page:"));
         pageEdit = new LineEdit;
         pageEdit->setText(QString::number(pageNumber));
@@ -46,7 +46,7 @@ PhotoForm::PhotoForm(QString idJournal, int page, QWidget *parent, bool edit) : 
 
     QVBoxLayout *mainLayout = new QVBoxLayout;
     mainLayout->addWidget(photoLabel);
-    if(yesEdit){
+    if(yesEdit && !readOnly){
         mainLayout->addWidget(pageLabel);
         mainLayout->addWidget(pageEdit);
         mainLayout->addWidget(cancelButton);

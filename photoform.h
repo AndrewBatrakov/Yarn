@@ -9,7 +9,7 @@ class PhotoForm : public QDialog
 {
     Q_OBJECT
 public:
-    PhotoForm(QString, int, QWidget *, bool);
+    PhotoForm(QString, int, QWidget *, bool,bool);
 
 private slots:
     void maxCount();

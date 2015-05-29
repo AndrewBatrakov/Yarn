@@ -120,7 +120,6 @@ void TegTableForm::addRecordOfTable()
 
     int row = tableWidget->rowCount();
     for(int i = 0; i < row; ++i){
-        //qDebug()<<tableWidget->item(i,1)->text();
         if(rr == tableWidget->item(i,1)->text()){
 
             QMessageBox::warning(this,tr("Attention!"),tr("%1 is present in tegs!").arg(tableWidget->item(i,0)->text()));
@@ -168,7 +167,6 @@ void TegTableForm::deleteRecordOfTable()
         query.prepare("DELETE FROM tegtable WHERE tegid = :id");
         query.bindValue(":id",tableWidget->item(rowNow,1)->text());
         query.exec();
-        //qDebug()<<tableWidget->item(rowNow,1)->text()<<" - "<<tableWidget->item(rowNow,0)->text();;
         tableWidget->removeRow(tableWidget->currentRow());
         tableWidget->repaint();
     }
@@ -177,7 +175,6 @@ void TegTableForm::deleteRecordOfTable()
 void TegTableForm::editRecordOfTable()
 {
     int rowNow = tableWidget->currentRow();
-    //qDebug()<<tableWidget->item(rowNow,1)->text();
     TegForm openForm(tableWidget->item(rowNow,1)->text(),this,false);
     openForm.exec();
     QString tegID = openForm.rowOut();
@@ -187,7 +184,6 @@ void TegTableForm::editRecordOfTable()
     query.bindValue(":id",tegID);
     query.exec();
     while(query.next()){
-        //tableWidget->insertRow(row);
         QTableWidgetItem *item1 = new QTableWidgetItem;
         tableWidget->setItem(rowNow,0,item1);
         tableWidget->item(rowNow,0)->setText(query.value(1).toString());

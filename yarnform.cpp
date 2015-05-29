@@ -365,7 +365,6 @@ void YarnForm::editRecord()
         if(!query.isValid()){
             NumPrefix numPrefix(this);
             indexTemp = numPrefix.getPrefix("yarn");
-            qDebug()<<indexTemp;
             if(indexTemp == ""){
                 close();
             }else{

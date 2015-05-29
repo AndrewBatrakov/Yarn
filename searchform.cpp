@@ -1,4 +1,5 @@
 #include "searchform.h"
+#include <QtSql>
 
 SearchForm::SearchForm(QString valueTempModel,QWidget *parent) :
     QDialog(parent)
@@ -25,6 +26,18 @@ SearchForm::SearchForm(QString valueTempModel,QWidget *parent) :
 
     field = new QComboBox;
     field->addItems(stringList);*/
+
+    QString queryString = "SELECT ";
+    queryString += valueTempModel;
+    queryString += "name FROM ";
+    queryString += valueTempModel;
+    QSqlQueryModel *tegModel = new QSqlQueryModel;
+    tegModel->setQuery(queryString);
+    QCompleter *tegComplieter = new QCompleter(tegModel);
+    tegComplieter->setCompletionMode(QCompleter::InlineCompletion);
+    tegComplieter->setCompletionMode(QCompleter::PopupCompletion);
+    tegComplieter->setCaseSensitivity(Qt::CaseInsensitive);
+    editSearch->setCompleter(tegComplieter);
 
     searchPushButton = new QPushButton(tr("Search"));
     connect(searchPushButton,SIGNAL(clicked()),this,SLOT(accept()));
@@ -55,6 +68,7 @@ void SearchForm::done(int result)
     if (result == QDialog::Accepted) {
         stTemp = editSearch->text().simplified();
     }
+    qDebug()<<stTemp;
     QDialog::done(result);
 }
 
