@@ -837,10 +837,10 @@ void MainWindow::searchProcedure()
 
     SearchForm searchForm(valueTempModel, this);
     searchForm.exec();
-    filterTable = searchForm.rowOut();
+    QString filter = searchForm.rowOut();
 
-    if(filterTable != ""){
-        filterTable.toLower();
+    if(filter != ""){
+        filterTable = filter.toLower();
         setFilter = true;
 
         tableView->setVisible(false);
