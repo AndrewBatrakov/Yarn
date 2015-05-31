@@ -318,8 +318,10 @@ void JournalForm::deletePhoto()
         queryPh.bindValue(":journalid",indexTemp);
         queryPh.exec();
         queryPh.next();
-        listWidget->clear();
-        listWidget->repaint();
+        //listWidget->clear();
+        //listWidget->setFlow(QListView::LeftToRight);
+        listWidget->visibleRegion();
+        //listWidget->repaint();
     }
 }
 
