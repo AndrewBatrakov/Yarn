@@ -53,17 +53,32 @@ ColorForm::ColorForm(QString id, QWidget *parent, bool onlyForRead) :
     setLayout(mainLayout);
 
     setWindowTitle(tr("Color"));
+
+    exchangeFile.setFileName("exchnge.txt");
+    if(!exchangeFile.isOpen()){
+        exchangeFile.open(QIODevice::ReadWrite);
+    }
 }
 
 void ColorForm::editRecord()
 {
+    QTextStream stream(&exchangeFile);
+    QString line;
+    //line = stream.readAll();
     if(indexTemp != ""){
         QSqlQuery query;
         query.prepare("UPDATE color SET colorname = :name WHERE colorid = :id");
         query.bindValue(":name",editForm->text());
         query.bindValue(":id",indexTemp);
         query.exec();
-        //nameTemp = editForm->text();
+        line += "UPDATE color SET colorname = '";
+        line += editForm->text();
+        line += "' WHERE colorid = '";
+        line += indexTemp;
+        line += "'";
+        line += "/r/n";
+        stream<<line;
+
     }else{
         QSqlQuery query;
         query.prepare("SELECT * FROM color WHERE colorname = :name");
@@ -81,7 +96,6 @@ void ColorForm::editRecord()
                 query.bindValue(":id",indexTemp);
                 query.bindValue(":name",editForm->text().simplified());
                 query.exec();
-                //nameTemp = editOrganization->text();
             }
         }else{
             QString tempString = editForm->text();
@@ -131,6 +145,7 @@ void ColorForm::deleteRecord()
 
 void ColorForm::done(int result)
 {
+    exchangeFile.close();
     writeSettings();
     QDialog::done(result);
 }

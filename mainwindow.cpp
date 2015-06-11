@@ -10,10 +10,13 @@
 #include "journalform.h"
 #include "searchform.h"
 #include "photoform.h"
+#include "exchangeform.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 {
+    fileExchange.setFileName("exchnge.txt");
+    fileExchange.open(QIODevice::ReadWrite);
     QPixmap pixLogo(":/logo.png");
     setWindowIcon(pixLogo);
 
@@ -261,6 +264,11 @@ MainWindow::~MainWindow()
 void MainWindow::closeEvent(QCloseEvent *event)
 {
     writeSettings();
+    if(fileExchange.size() == 0){
+        fileExchange.remove();
+    }else{
+        fileExchange.close();
+    }
 }
 
 void MainWindow::readSettings()
@@ -365,6 +373,9 @@ void MainWindow::createActions()
     searchAction = new QAction(tr("Search In Journal By Contens..."),this);
     connect(searchAction,SIGNAL(triggered()),this,SLOT(searchProcedure()));
 
+    exchangeAction = new QAction(tr("Exchange Data Base..."),this);
+    connect(exchangeAction,SIGNAL(triggered()),this,SLOT(exchangeData()));
+
     //Help Action
     aboutQtAction = new QAction(tr("About Qt..."),this);
     connect(aboutQtAction,SIGNAL(triggered()),qApp,SLOT(aboutQt()));
@@ -400,6 +411,8 @@ void MainWindow::createMenu()
     serviceMenu->addAction(getAction);
     serviceMenu->addSeparator();
     serviceMenu->addAction(searchAction);
+    serviceMenu->addSeparator();
+    serviceMenu->addAction(exchangeAction);
 
     menuBar()->addSeparator();
     helpMenu = menuBar()->addMenu(tr("Help"));
@@ -901,4 +914,10 @@ void MainWindow::readItem()
     queryJ.next();
     PhotoForm formOpen(queryJ.value(0).toString(),page,this,true,true);
     formOpen.exec();
+}
+
+void MainWindow::exchangeData()
+{
+    ExchngeForm openForm(this);
+    openForm.exec();
 }

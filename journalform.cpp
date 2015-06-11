@@ -320,7 +320,7 @@ void JournalForm::deletePhoto()
         queryPh.next();
         //listWidget->clear();
         //listWidget->setFlow(QListView::LeftToRight);
-        listWidget->visibleRegion();
+        listWidget->takeItem(listWidget->currentRow());
         //listWidget->repaint();
     }
 }

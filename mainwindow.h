@@ -43,6 +43,7 @@ private slots:
     void getBaseProcedure();
     void searchProcedure();
     void readItem();
+    void exchangeData();
 
 private:
     QVBoxLayout *mainLayout;
@@ -87,6 +88,7 @@ private:
     QAction *searchAction;
     QAction *putAction;
     QAction *getAction;
+    QAction *exchangeAction;
     //QAction *vaccumAction;
 
     QMenu *helpMenu;
@@ -96,6 +98,7 @@ private:
     //int addressInt, portInt;
     bool setFilter;
     QString filterTable;
+    QFile fileExchange;
 
 protected:
     void closeEvent(QCloseEvent *);
