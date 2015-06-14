@@ -15,7 +15,7 @@
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 {
-    fileExchange.setFileName("exchnge.txt");
+    fileExchange.setFileName("exchange.txt");
     fileExchange.open(QIODevice::ReadWrite);
     QPixmap pixLogo(":/logo.png");
     setWindowIcon(pixLogo);
@@ -261,7 +261,7 @@ MainWindow::~MainWindow()
 
 }
 
-void MainWindow::closeEvent(QCloseEvent *event)
+void MainWindow::closeEvent(QCloseEvent *)
 {
     writeSettings();
     if(fileExchange.size() == 0){
@@ -894,7 +894,7 @@ void MainWindow::searchProcedure()
     }
 }
 
-void MainWindow::resizeEvent(QResizeEvent *event)
+void MainWindow::resizeEvent(QResizeEvent *)
 {
     listWidget->setFlow(QListView::LeftToRight);
     listWidget->repaint();
@@ -918,6 +918,6 @@ void MainWindow::readItem()
 
 void MainWindow::exchangeData()
 {
-    ExchngeForm openForm(this);
+    exchangeForm openForm(this);
     openForm.exec();
 }

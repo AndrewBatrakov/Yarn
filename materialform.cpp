@@ -65,42 +65,23 @@ MaterialForm::MaterialForm(QString id, QWidget *parent, bool onlyForRead) : QDia
     setLayout(mainLayout);
 
     setWindowTitle(tr("Material"));
+    exchangeFile.setFileName("exchange.txt");
+    if(!exchangeFile.isOpen()){
+        exchangeFile.open(QIODevice::ReadWrite);
+    }
 }
 
 void MaterialForm::deleteRecord()
 {
     ForDelete forDelete(indexTemp,"material",this);
 
-    int tt = forDelete.result();
-    //if(forDelete.result() != 0){
-    //    forDelete.exec();
-    //int k = QMessageBox::warning(this,tr("Attention!!!"),tr("Delete item with the replacement for default value?"),
-    //                     QMessageBox::No|QMessageBox::Yes,QMessageBox::No);
-    //if(k == QMessageBox::Yes){
+    forDelete.result();
     forDelete.deleteOnDefault();
-    if(indexTemp != "OWN000000001"){
-        QSqlQuery query;
-        query.prepare("DELETE FROM material WHERE materialid = :id");
-        query.bindValue(":id",indexTemp);
-        query.exec();
-        query.next();
-    }else{
-        QMessageBox::warning(this,QObject::tr("Attention"),QObject::tr("You dont may delete default value!"));
-    }
-    // }
-    // }
-    /*else{
-           if(indexTemp != "OWN000000001"){
-               QSqlQuery query;
-               query.prepare("DELETE FROM organization WHERE organizationid = :id");
-               query.bindValue(":id",indexTemp);
-               query.exec();
-               query.next();
-           }else{
-               QMessageBox::warning(this,QObject::tr("Attention"),QObject::tr("You dont may delete default value!"));
-           }
-       }*/
-
+    QSqlQuery query;
+    query.prepare("DELETE FROM material WHERE materialid = :id");
+    query.bindValue(":id",indexTemp);
+    query.exec();
+    query.next();
 }
 
 void MaterialForm::editRecord()

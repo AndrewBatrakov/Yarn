@@ -31,6 +31,7 @@ private:
     QDialogButtonBox *buttonBox;
 
     QString indexTemp;
+    QFile exchangeFile;
 };
 
 #endif // TEGINPUTFORM_H

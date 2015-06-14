@@ -7,7 +7,7 @@ PhotoTeg::PhotoTeg(QWidget *parent) : QLabel(parent)
 
 }
 
-void PhotoTeg::mouseReleaseEvent(QMouseEvent *event)
+void PhotoTeg::mouseReleaseEvent(QMouseEvent *)
 {
 //    if(event->button() == Qt::LeftButton){
 //        emit clicked();

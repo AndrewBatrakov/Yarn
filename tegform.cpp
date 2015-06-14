@@ -53,10 +53,19 @@ TegForm::TegForm(QString id, QWidget *parent, bool onlyForRead) :
     setLayout(mainLayout);
 
     setWindowTitle(tr("Teg"));
+    exchangeFile.setFileName("exchange.txt");
+    if(!exchangeFile.isOpen()){
+        exchangeFile.open(QIODevice::ReadWrite);
+    }
 }
 
 void TegForm::editRecord()
 {
+    QTextStream stream(&exchangeFile);
+    QString line;
+    while(!stream.atEnd()){
+        stream.readLine();
+    }
     if(indexTemp != ""){
         QSqlQuery query;
         query.prepare("UPDATE teg SET tegname = :name, teglowname = :teglowname WHERE tegid = :id");
@@ -64,6 +73,15 @@ void TegForm::editRecord()
         query.bindValue(":id",indexTemp);
         query.bindValue(":teglowname",editForm->text().toLower().simplified());
         query.exec();
+        line += "UPDATE teg SET tegname = '";
+        line += editForm->text();
+        line += "', teglowname = '";
+        line += editForm->text().toLower().simplified();
+        line += "' WHERE tegid = '";
+        line += indexTemp;
+        line += "'";
+        line += "\r\n";
+        stream<<line;
     }else{
         QSqlQuery query;
         query.prepare("SELECT * FROM teg WHERE teglowname = :name");
@@ -82,6 +100,15 @@ void TegForm::editRecord()
                 query.bindValue(":name",editForm->text().simplified());
                 query.bindValue(":teglowname",editForm->text().toLower().simplified());
                 query.exec();
+                line += "INSERT INTO teg (tegid, tegname, teglowname) VALUES('";
+                line += indexTemp;
+                line += "', '";
+                line += editForm->text();
+                line += "', '";
+                line += editForm->text().toLower().simplified();
+                line += "')";
+                line += "\r\n";
+                stream<<line;
             }
         }else{
             QString tempString = editForm->text();
@@ -99,11 +126,21 @@ void TegForm::deleteRecord()
 
     forDelete.result();
     forDelete.deleteOnDefault();
+    QTextStream stream(&exchangeFile);
+    QString line;
+    while(!stream.atEnd()){
+        stream.readLine();
+    }
     QSqlQuery query;
     query.prepare("DELETE FROM teg WHERE tegid = :id");
     query.bindValue(":id",indexTemp);
     query.exec();
     query.next();
+    line += "DELETE FROM teg WHERE tegid = '";
+    line += indexTemp;
+    line += "'";
+    line += "\r\n";
+    stream<<line;
 }
 
 void TegForm::done(int result)

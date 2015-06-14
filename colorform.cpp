@@ -54,7 +54,7 @@ ColorForm::ColorForm(QString id, QWidget *parent, bool onlyForRead) :
 
     setWindowTitle(tr("Color"));
 
-    exchangeFile.setFileName("exchnge.txt");
+    exchangeFile.setFileName("exchange.txt");
     if(!exchangeFile.isOpen()){
         exchangeFile.open(QIODevice::ReadWrite);
     }
@@ -64,7 +64,9 @@ void ColorForm::editRecord()
 {
     QTextStream stream(&exchangeFile);
     QString line;
-    //line = stream.readAll();
+    while(!stream.atEnd()){
+        stream.readLine();
+    }
     if(indexTemp != ""){
         QSqlQuery query;
         query.prepare("UPDATE color SET colorname = :name WHERE colorid = :id");
@@ -72,13 +74,12 @@ void ColorForm::editRecord()
         query.bindValue(":id",indexTemp);
         query.exec();
         line += "UPDATE color SET colorname = '";
-        line += editForm->text();
+        line += editForm->text().toUtf8();
         line += "' WHERE colorid = '";
         line += indexTemp;
         line += "'";
-        line += "/r/n";
+        line += "\r\n";
         stream<<line;
-
     }else{
         QSqlQuery query;
         query.prepare("SELECT * FROM color WHERE colorname = :name");
@@ -96,6 +97,13 @@ void ColorForm::editRecord()
                 query.bindValue(":id",indexTemp);
                 query.bindValue(":name",editForm->text().simplified());
                 query.exec();
+                line += "INSERT INTO color (colorid, colorname) VALUES('";
+                line += indexTemp;
+                line += "', '";
+                line += editForm->text().toUtf8();
+                line += "')";
+                line += "\r\n";
+                stream<<line;
             }
         }else{
             QString tempString = editForm->text();
@@ -110,37 +118,23 @@ void ColorForm::editRecord()
 void ColorForm::deleteRecord()
 {
     ForDelete forDelete(indexTemp,"color",this);
-
-    int tt = forDelete.result();
-    //if(forDelete.result() != 0){
-    //    forDelete.exec();
-    //int k = QMessageBox::warning(this,tr("Attention!!!"),tr("Delete item with the replacement for default value?"),
-    //                     QMessageBox::No|QMessageBox::Yes,QMessageBox::No);
-    //if(k == QMessageBox::Yes){
+    forDelete.result();
     forDelete.deleteOnDefault();
-    if(indexTemp != "OWN000000001"){
-        QSqlQuery query;
-        query.prepare("DELETE FROM color WHERE colorid = :id");
-        query.bindValue(":id",indexTemp);
-        query.exec();
-        query.next();
-    }else{
-        QMessageBox::warning(this,QObject::tr("Attention"),QObject::tr("You dont may delete default value!"));
+    QTextStream stream(&exchangeFile);
+    QString line;
+    while(!stream.atEnd()){
+        stream.readLine();
     }
-    // }
-    // }
-    /*else{
-           if(indexTemp != "OWN000000001"){
-               QSqlQuery query;
-               query.prepare("DELETE FROM organization WHERE organizationid = :id");
-               query.bindValue(":id",indexTemp);
-               query.exec();
-               query.next();
-           }else{
-               QMessageBox::warning(this,QObject::tr("Attention"),QObject::tr("You dont may delete default value!"));
-           }
-       }*/
-
+    QSqlQuery query;
+    query.prepare("DELETE FROM color WHERE colorid = :id");
+    query.bindValue(":id",indexTemp);
+    query.exec();
+    query.next();
+    line += "DELETE FROM color WHERE colorid = '";
+    line += indexTemp;
+    line += "'";
+    line += "\r\n";
+    stream<<line;
 }
 
 void ColorForm::done(int result)

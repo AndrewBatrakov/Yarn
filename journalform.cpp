@@ -102,7 +102,12 @@ JournalForm::JournalForm(QString id, QWidget *parent, bool onlyForRead) :
     setWindowTitle(tr("Journal"));
 
     createContextMenu();
-    //connect(listWidget,SIGNAL())
+    exchangeFile.setFileName("exchange.txt");
+    if(!exchangeFile.isOpen()){
+        exchangeFile.open(QIODevice::Append);
+    }else{
+        exchangeFile.open(QFile::Append);
+    }
 }
 
 void JournalForm::editRecord()
@@ -154,36 +159,13 @@ void JournalForm::deleteRecord()
 {
     ForDelete forDelete(indexTemp,"journal",this);
 
-    int tt = forDelete.result();
-    //if(forDelete.result() != 0){
-    //    forDelete.exec();
-    //int k = QMessageBox::warning(this,tr("Attention!!!"),tr("Delete item with the replacement for default value?"),
-    //                     QMessageBox::No|QMessageBox::Yes,QMessageBox::No);
-    //if(k == QMessageBox::Yes){
+    forDelete.result();
     forDelete.deleteOnDefault();
-    if(indexTemp != "OWN000000001"){
-        QSqlQuery query;
-        query.prepare("DELETE FROM journal WHERE journalid = :id");
-        query.bindValue(":id",indexTemp);
-        query.exec();
-        query.next();
-    }else{
-        QMessageBox::warning(this,QObject::tr("Attention"),QObject::tr("You dont may delete default value!"));
-    }
-    // }
-    // }
-    /*else{
-           if(indexTemp != "OWN000000001"){
-               QSqlQuery query;
-               query.prepare("DELETE FROM organization WHERE organizationid = :id");
-               query.bindValue(":id",indexTemp);
-               query.exec();
-               query.next();
-           }else{
-               QMessageBox::warning(this,QObject::tr("Attention"),QObject::tr("You dont may delete default value!"));
-           }
-       }*/
-
+    QSqlQuery query;
+    query.prepare("DELETE FROM journal WHERE journalid = :id");
+    query.bindValue(":id",indexTemp);
+    query.exec();
+    query.next();
 }
 
 void JournalForm::done(int result)
@@ -237,6 +219,8 @@ void JournalForm::createContextMenu()
 
 void JournalForm::addPhoto()
 {
+    QDataStream stream(&exchangeFile);
+
     QString fileName = QFileDialog::getOpenFileName(this,tr("Open File"),"",tr("Images (*.jpg *.gif *.png)"));
     QFile file(fileName);
     if(file.open(QIODevice::ReadOnly)){
@@ -276,8 +260,6 @@ void JournalForm::addPhoto()
                            ":journalphotoid, :journalid, :journalphoto, :journalicon, :page)"
                            );
         queryPhoto.bindValue(":journalid",indexTemp);
-
-
         queryPhoto.bindValue(":journalphoto",imageByte);
         queryPhoto.bindValue(":journalicon",imageByteIcon);
         NumPrefix numPrefix(this);
@@ -285,6 +267,19 @@ void JournalForm::addPhoto()
         queryPhoto.bindValue(":journalphotoid",valID);
         queryPhoto.bindValue(":page",pageNum);
         queryPhoto.exec();
+        stream<<"INSERT INTO journalphoto (journalphotoid, journalid, "
+                "journalphoto, journalicon, page) VALUES('";
+        stream<<valID;
+        stream<<"', '";
+        stream<<indexTemp;
+        stream<<"', '";
+        stream<<imageByte;
+        stream<<"', ";
+        stream<<imageByteIcon;
+        stream<<"', '";
+        stream<<pageNum;
+        stream<<"')";
+        stream<<"\r\n";
 
         QListWidgetItem *listItem = new QListWidgetItem(listWidget);
         QString page = tr("Page ");
@@ -325,7 +320,7 @@ void JournalForm::deletePhoto()
     }
 }
 
-void JournalForm::resizeEvent(QResizeEvent *event)
+void JournalForm::resizeEvent(QResizeEvent *)
 {
     listWidget->setFlow(QListView::LeftToRight);
     listWidget->repaint();

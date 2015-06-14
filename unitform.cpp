@@ -53,6 +53,10 @@ UnitForm::UnitForm(QString id, QWidget *parent, bool onlyForRead) :
     setLayout(mainLayout);
 
     setWindowTitle(tr("Unit"));
+    exchangeFile.setFileName("exchange.txt");
+    if(!exchangeFile.isOpen()){
+        exchangeFile.open(QIODevice::ReadWrite);
+    }
 }
 
 void UnitForm::editRecord()
@@ -95,36 +99,13 @@ void UnitForm::deleteRecord()
 {
     ForDelete forDelete(indexTemp,"unit",this);
 
-    int tt = forDelete.result();
-    //if(forDelete.result() != 0){
-    //    forDelete.exec();
-    //int k = QMessageBox::warning(this,tr("Attention!!!"),tr("Delete item with the replacement for default value?"),
-    //                     QMessageBox::No|QMessageBox::Yes,QMessageBox::No);
-    //if(k == QMessageBox::Yes){
+    forDelete.result();
     forDelete.deleteOnDefault();
-    if(indexTemp != "OWN000000001"){
-        QSqlQuery query;
-        query.prepare("DELETE FROM unit WHERE unitid = :id");
-        query.bindValue(":id",indexTemp);
-        query.exec();
-        query.next();
-    }else{
-        QMessageBox::warning(this,QObject::tr("Attention"),QObject::tr("You dont may delete default value!"));
-    }
-    // }
-    // }
-    /*else{
-                          if(indexTemp != "OWN000000001"){
-                              QSqlQuery query;
-                              query.prepare("DELETE FROM organization WHERE organizationid = :id");
-                              query.bindValue(":id",indexTemp);
-                              query.exec();
-                              query.next();
-                          }else{
-                              QMessageBox::warning(this,QObject::tr("Attention"),QObject::tr("You dont may delete default value!"));
-                          }
-                      }*/
-
+    QSqlQuery query;
+    query.prepare("DELETE FROM unit WHERE unitid = :id");
+    query.bindValue(":id",indexTemp);
+    query.exec();
+    query.next();
 }
 
 void UnitForm::done(int result)

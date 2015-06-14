@@ -121,7 +121,10 @@ StructureForm::StructureForm(QString id,QWidget *parent, bool onlyForRead) : QDi
     connect(tableWidget,SIGNAL(cellDoubleClicked(int,int)),this,SLOT(editRecordOfTable()));
 
     setWindowTitle(tr("Structure"));
-
+    exchangeFile.setFileName("exchange.txt");
+    if(!exchangeFile.isOpen()){
+        exchangeFile.open(QIODevice::ReadWrite);
+    }
 }
 
 void StructureForm::editRecord()

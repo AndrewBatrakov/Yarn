@@ -55,6 +55,10 @@ PhotoForm::PhotoForm(QString idJournal, int page, QWidget *parent, bool edit,boo
     setLayout(mainLayout);
 
     setWindowTitle(tr("Pages Of Journal"));
+    exchangeFile.setFileName("exchange.txt");
+    if(!exchangeFile.isOpen()){
+        exchangeFile.open(QIODevice::ReadWrite);
+    }
 }
 
 

@@ -315,6 +315,10 @@ YarnForm::YarnForm(QString iD, QWidget *parent, bool onlyForRead)
     setLayout(mainLayout);
 
     setWindowTitle(tr("Yarn"));
+    exchangeFile.setFileName("exchange.txt");
+    if(!exchangeFile.isOpen()){
+        exchangeFile.open(QIODevice::ReadWrite);
+    }
 }
 
 void YarnForm::done(int result)

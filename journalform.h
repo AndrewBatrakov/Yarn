@@ -49,6 +49,7 @@ private:
 
     QString indexTemp;
     int pageNumber;
+    QFile exchangeFile;
 
 protected:
     void resizeEvent(QResizeEvent *);

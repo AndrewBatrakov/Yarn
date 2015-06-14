@@ -53,6 +53,7 @@ private:
     QAction *editAction;
 
     QTableWidget *tableWidget;
+    QFile exchangeFile;
 };
 
 #endif // STRUCTUREFORM_H

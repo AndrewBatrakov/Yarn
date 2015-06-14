@@ -59,6 +59,7 @@ private:
     QPushButton *cancelButton;
     QDialogButtonBox *buttonBox;
     QString indexTemp;
+    QFile exchangeFile;
 };
 
 #endif // YARNFORM_H

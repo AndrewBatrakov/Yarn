@@ -97,6 +97,10 @@ TegTableForm::TegTableForm(QString iD, QString idPhoto, QWidget *parent, bool on
     connect(tableWidget,SIGNAL(cellDoubleClicked(int,int)),this,SLOT(editRecordOfTable()));
 
     setWindowTitle(tr("Teg"));
+    exchangeFile.setFileName("exchange.txt");
+    if(!exchangeFile.isOpen()){
+        exchangeFile.open(QIODevice::ReadWrite);
+    }
 }
 
 void TegTableForm::deleteRecord()

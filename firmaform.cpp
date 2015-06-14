@@ -53,16 +53,32 @@ FirmaForm::FirmaForm(QString id, QWidget *parent, bool onlyForRead) :
     setLayout(mainLayout);
 
     setWindowTitle(tr("Firma"));
+    exchangeFile.setFileName("exchange.txt");
+    if(!exchangeFile.isOpen()){
+        exchangeFile.open(QIODevice::ReadWrite);
+    }
 }
 
 void FirmaForm::editRecord()
 {
+    QTextStream stream(&exchangeFile);
+    QString line;
+    while(!stream.atEnd()){
+        stream.readLine();
+    }
     if(indexTemp != ""){
         QSqlQuery query;
         query.prepare("UPDATE firma SET firmaname = :name WHERE firmaid = :id");
         query.bindValue(":name",editForm->text());
         query.bindValue(":id",indexTemp);
         query.exec();
+        line += "UPDATE firma SET firmaname = '";
+        line += editForm->text().toUtf8();
+        line += "' WHERE firmaid = '";
+        line += indexTemp;
+        line += "'";
+        line += "\r\n";
+        stream<<line;
     }else{
         QSqlQuery query;
         query.prepare("SELECT * FROM firma WHERE firmaname = :name");
@@ -80,6 +96,13 @@ void FirmaForm::editRecord()
                 query.bindValue(":id",indexTemp);
                 query.bindValue(":name",editForm->text().simplified());
                 query.exec();
+                line += "INSERT INTO firma (firmaid, firmaname) VALUES('";
+                line += indexTemp;
+                line += "', '";
+                line += editForm->text().toUtf8();
+                line += "')";
+                line += "\r\n";
+                stream<<line;
             }
         }else{
             QString tempString = editForm->text();
@@ -95,36 +118,23 @@ void FirmaForm::deleteRecord()
 {
     ForDelete forDelete(indexTemp,"firma",this);
 
-    int tt = forDelete.result();
-    //if(forDelete.result() != 0){
-    //    forDelete.exec();
-    //int k = QMessageBox::warning(this,tr("Attention!!!"),tr("Delete item with the replacement for default value?"),
-    //                     QMessageBox::No|QMessageBox::Yes,QMessageBox::No);
-    //if(k == QMessageBox::Yes){
+    forDelete.result();
     forDelete.deleteOnDefault();
-    if(indexTemp != "OWN000000001"){
-        QSqlQuery query;
-        query.prepare("DELETE FROM firma WHERE firmaid = :id");
-        query.bindValue(":id",indexTemp);
-        query.exec();
-        query.next();
-    }else{
-        QMessageBox::warning(this,QObject::tr("Attention"),QObject::tr("You dont may delete default value!"));
+    QTextStream stream(&exchangeFile);
+    QString line;
+    while(!stream.atEnd()){
+        stream.readLine();
     }
-    // }
-    // }
-    /*else{
-           if(indexTemp != "OWN000000001"){
-               QSqlQuery query;
-               query.prepare("DELETE FROM organization WHERE organizationid = :id");
-               query.bindValue(":id",indexTemp);
-               query.exec();
-               query.next();
-           }else{
-               QMessageBox::warning(this,QObject::tr("Attention"),QObject::tr("You dont may delete default value!"));
-           }
-       }*/
-
+    QSqlQuery query;
+    query.prepare("DELETE FROM firma WHERE firmaid = :id");
+    query.bindValue(":id",indexTemp);
+    query.exec();
+    query.next();
+    line += "DELETE FROM firma WHERE firmaid = '";
+    line += indexTemp;
+    line += "'";
+    line += "\r\n";
+    stream<<line;
 }
 
 void FirmaForm::done(int result)

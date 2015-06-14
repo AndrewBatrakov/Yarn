@@ -30,6 +30,7 @@ private:
     QDialogButtonBox *buttonBox;
 
     QString indexTemp;
+    QFile exchangeFile;
 };
 
 #endif // UNITFORM_H

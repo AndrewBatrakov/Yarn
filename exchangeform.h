@@ -1,17 +1,17 @@
-#ifndef EXCHNGEFORM_H
-#define EXCHNGEFORM_H
+#ifndef exchangeFORM_H
+#define exchangeFORM_H
 
 #include <QtWidgets>
 
-class ExchngeForm : public QDialog
+class exchangeForm : public QDialog
 {
     Q_OBJECT
 public:
-    ExchngeForm(QWidget *parent);
+    exchangeForm(QWidget *parent);
 
 private:
     QPushButton *exchangeButton;
     QDialogButtonBox *buttonBox;
 };
 
-#endif // EXCHNGEFORM_H
+#endif // exchangeFORM_H

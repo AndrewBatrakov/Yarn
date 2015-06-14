@@ -29,6 +29,7 @@ private:
     int pageMax;
     QAction *editTag;
     QString indexTemp;
+    QFile exchangeFile;
 
 protected:
     void mousePressEvent(QMouseEvent *);
