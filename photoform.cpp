@@ -37,12 +37,18 @@ PhotoForm::PhotoForm(QString idJournal, int page, QWidget *parent, bool edit,boo
         buttonBox->addButton(cancelButton,QDialogButtonBox::ActionRole);
         buttonBox->addButton(saveButton,QDialogButtonBox::ActionRole);
     }
+    //journalPhotoID =query.value(1).toString();
     indexTemp = query.value(1).toString();
     QByteArray imageByte = query.value(0).toByteArray();
     QImage pixMap;
+    QImage re;
     pixMap.loadFromData(imageByte);
-    //QImage re = pixMap.scaled(100,200,Qt::KeepAspectRatio,Qt::SmoothTransformation);
-    photoLabel->setPixmap(QPixmap::fromImage(pixMap));
+    int widI = QPixmap::fromImage(pixMap).width();
+    int hei = QApplication::desktop()->height()-100;
+    re = pixMap.scaled(widI,hei,Qt::KeepAspectRatio,Qt::SmoothTransformation);
+    photoLabel->setPixmap(QPixmap::fromImage(re));
+    photoLabel->resize(photoLabel->sizeHint());
+    this->resize(photoLabel->sizeHint());
 
     QVBoxLayout *mainLayout = new QVBoxLayout;
     mainLayout->addWidget(photoLabel);
@@ -54,74 +60,55 @@ PhotoForm::PhotoForm(QString idJournal, int page, QWidget *parent, bool edit,boo
     }
     setLayout(mainLayout);
 
-    setWindowTitle(tr("Pages Of Journal"));
+    setWindowTitle(tr("Pages Of Journal %1").arg(PhotoForm::height()));
     exchangeFile.setFileName("exchange.txt");
     if(!exchangeFile.isOpen()){
         exchangeFile.open(QIODevice::ReadWrite);
     }
+
+    createContextMenu();
 }
 
 
 void PhotoForm::mousePressEvent(QMouseEvent *mouseEvent)
 {
     if(!yesEdit){
-    if(mouseEvent->button() == Qt::LeftButton){
-        if(mouseEvent->localPos().x() < size().width()/2){
-            if(--pageNumber == 0)
-                pageNumber = pageMax;
-        }else{
-            if(++pageNumber > pageMax)
-                pageNumber = 1;
-        }
-
-        QSqlQuery query;
-        query.prepare("SELECT journalphoto FROM journalphoto WHERE (journalid = :journalid AND page = :page)");
-        query.bindValue(":journalid",journalID);
-        query.bindValue(":page",pageNumber);
-        query.exec();
-        while(query.next()){
-            QByteArray imageByte = query.value(0).toByteArray();
-            QImage pixMap;
-            pixMap.loadFromData(imageByte);
-            photoLabel->setPixmap(QPixmap::fromImage(pixMap));
-            int hei = QApplication::desktop()->height();
-            if(hei < photoLabel->height()){
-                this->setMaximumHeight(hei);
+        if(mouseEvent->button() == Qt::LeftButton){
+            if(mouseEvent->localPos().x() < size().width()/2){
+                if(--pageNumber == 0)
+                    pageNumber = pageMax;
             }else{
+                if(++pageNumber > pageMax)
+                    pageNumber = 1;
+            }
+
+            QSqlQuery query;
+            query.prepare("SELECT journalphoto FROM journalphoto WHERE (journalid = :journalid AND page = :page)");
+            query.bindValue(":journalid",journalID);
+            query.bindValue(":page",pageNumber);
+            query.exec();
+            QImage re;
+            while(query.next()){
+                QByteArray imageByte = query.value(0).toByteArray();
+                QImage pixMap;
+                pixMap.loadFromData(imageByte);
+                int widI = QPixmap::fromImage(pixMap).width();
+                int hei = QApplication::desktop()->height()-100;
+                re = pixMap.scaled(widI,hei,Qt::KeepAspectRatio,Qt::SmoothTransformation);
+                photoLabel->setPixmap(QPixmap::fromImage(re));
+                photoLabel->resize(photoLabel->sizeHint());
                 this->resize(photoLabel->sizeHint());
             }
         }
-    }else if(mouseEvent->button() == Qt::RightButton){
-        QMenu menu(photoLabel);
-        QPixmap pixD(":/edit.png");
-        menu.addAction(pixD,tr("Edit Tegs For Search"));
-        menu.setContextMenuPolicy(Qt::ActionsContextMenu);
-        QAction *m = menu.exec(mouseEvent->globalPos());
-        if(m){
-            QSqlQuery queryPh;
-            queryPh.prepare("SELECT journalphotoid FROM journalphoto WHERE (page = :page AND journalid = :journalid)");
-            queryPh.bindValue(":page",pageNumber);
-            queryPh.bindValue(":journalid",journalID);
-            queryPh.exec();
-            queryPh.next();
-
-            QSqlQuery query;
-            query.prepare("SELECT tegtableid FROM tegtable WHERE journalphotoid = :journalphotoid");
-            query.bindValue(":journalphotoid",queryPh.value(0).toString());
-            query.exec();
-            query.next();
-            TegTableForm openForm(query.value(0).toString(),queryPh.value(0).toString(),this,false);
-            openForm.exec();
-
-        }
-    }
     }
 }
 
 void PhotoForm::maxCount()
 {
     QSqlQuery query;
-    query.exec("SELECT COUNT(*) FROM journalphoto");
+    query.prepare("SELECT count(*) FROM journalphoto WHERE journalid = :id");
+    query.bindValue(":id",journalID);
+    query.exec();
     query.next();
     pageMax = query.value(0).toInt();
 }
@@ -136,4 +123,33 @@ void PhotoForm::editRecord()
     queryPh.exec();
     queryPh.next();
     close();
+}
+
+void PhotoForm::createContextMenu()
+{
+    editTagForm = new QAction(tr("Edit Tegs For Search"),this);
+    QPixmap pixD(":/edit.png");
+    editTagForm->setIcon(pixD);
+    connect(editTagForm,SIGNAL(triggered()),this,SLOT(addTag()));
+    photoLabel->addAction(editTagForm);
+    photoLabel->setContextMenuPolicy(Qt::ActionsContextMenu);
+}
+
+void PhotoForm::addTag()
+{
+    QSqlQuery queryPh;
+    queryPh.prepare("SELECT journalphotoid FROM journalphoto WHERE (journalid = :journalid AND page = :page)");
+    //"SELECT journalphoto, journalphotoid FROM journalphoto WHERE (journalid = :journalid AND page = :page)
+    queryPh.bindValue(":page",pageNumber);
+    queryPh.bindValue(":journalid",journalID);
+    queryPh.exec();
+    queryPh.next();
+
+    QSqlQuery query;
+    query.prepare("SELECT tegtableid FROM tegtable WHERE journalphotoid = :journalphotoid");
+    query.bindValue(":journalphotoid",indexTemp);
+    query.exec();
+    query.next();
+    TegTableForm openForm(query.value(0).toString(),queryPh.value(0).toString(),this,false);
+    openForm.exec();
 }

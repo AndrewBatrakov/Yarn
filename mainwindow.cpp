@@ -834,14 +834,18 @@ void MainWindow::getBaseProcedure()
 
 void MainWindow::copyRecordOfTable()
 {
-//    QString stringVar = templateModel->tableName();
-//    QModelIndex index = tableView->currentIndex();
-//    if(index.isValid()){
-//        QSqlRecord record =templateModel->record(index.row());
-//        if(stringVar == "color"){
-//            QString iD = record.value("colorid").toString();
-//    QSqlQueryModel tableModel;
-
+    QString stringVar = templateModel->tableName();
+    QModelIndex index = tableView->currentIndex();
+    if(index.isValid()){
+        QSqlRecord record =templateModel->record(index.row());
+        if(stringVar == "journal"){
+            QString iD = record.value("journalid").toString();
+            JournalForm form(iD, this, false);
+            form.exec();
+        }
+    }
+    QModelIndex modIndex = tableView->currentIndex();
+    MainWindow::updatePanel(modIndex);
 }
 
 void MainWindow::searchProcedure()

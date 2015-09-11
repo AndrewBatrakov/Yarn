@@ -72,7 +72,7 @@ JournalForm::JournalForm(QString id, QWidget *parent, bool onlyForRead) :
             while(queryPhoto.next()){
                 QListWidgetItem *listItem = new QListWidgetItem(listWidget);
                 QString page = tr("Page ");
-                page += queryPhoto.value(4).toString();
+                page += queryPhoto.value(3).toString();
                 listItem->setText(page);
                 imageByte = queryPhoto.value(2).toByteArray();
                 pixMap.loadFromData(imageByte);
@@ -241,11 +241,11 @@ void JournalForm::addPhoto()
         buffer.open(QIODevice::WriteOnly);
         re.save(&buffer, "PNG"); // writes image into ba in PNG format
 
-        QImage icon = pixMap.scaled(300,400,Qt::KeepAspectRatio,Qt::SmoothTransformation);
-        QByteArray imageByteIcon;
-        QBuffer bufferIcon(&imageByteIcon);
-        bufferIcon.open(QIODevice::WriteOnly);
-        icon.save(&bufferIcon, "PNG"); // writes image into ba in PNG format
+//        QImage icon = pixMap.scaled(300,400,Qt::KeepAspectRatio,Qt::SmoothTransformation);
+//        QByteArray imageByteIcon;
+//        QBuffer bufferIcon(&imageByteIcon);
+//        bufferIcon.open(QIODevice::WriteOnly);
+//        icon.save(&bufferIcon, "PNG"); // writes image into ba in PNG format
 
         QSqlQuery queryPhotoControl;
         queryPhotoControl.prepare("SELECT COUNT(*) FROM journalphoto WHERE journalid = :id");
@@ -256,12 +256,12 @@ void JournalForm::addPhoto()
         ++pageNum;
         QSqlQuery queryPhoto;
         queryPhoto.prepare("INSERT INTO journalphoto (journalphotoid, journalid, "
-                           "journalphoto, journalicon, page) VALUES("
-                           ":journalphotoid, :journalid, :journalphoto, :journalicon, :page)"
+                           "journalphoto, page) VALUES("
+                           ":journalphotoid, :journalid, :journalphoto, :page)"
                            );
         queryPhoto.bindValue(":journalid",indexTemp);
         queryPhoto.bindValue(":journalphoto",imageByte);
-        queryPhoto.bindValue(":journalicon",imageByteIcon);
+        //queryPhoto.bindValue(":journalicon",imageByteIcon);
         NumPrefix numPrefix(this);
         QString valID = numPrefix.getPrefix("journalphoto");
         queryPhoto.bindValue(":journalphotoid",valID);
@@ -275,8 +275,8 @@ void JournalForm::addPhoto()
         stream<<"', '";
         stream<<imageByte;
         stream<<"', ";
-        stream<<imageByteIcon;
-        stream<<"', '";
+//        stream<<imageByteIcon;
+//        stream<<"', '";
         stream<<pageNum;
         stream<<"')";
         stream<<"\r\n";

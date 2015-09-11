@@ -2,7 +2,6 @@
 #define PHOTOFORM_H
 
 #include <QtWidgets>
-#include "phototeg.h"
 #include "lineedit.h"
 
 class PhotoForm : public QDialog
@@ -14,8 +13,11 @@ public:
 private slots:
     void maxCount();
     void editRecord();
+    void createContextMenu();
+    void addTag();
 
 private:
+    QAction *editTagForm;
     QLabel *pageLabel;
     LineEdit *pageEdit;
     bool yesEdit;
@@ -29,6 +31,7 @@ private:
     int pageMax;
     QAction *editTag;
     QString indexTemp;
+    //QString journalPhotoID;
     QFile exchangeFile;
 
 protected:

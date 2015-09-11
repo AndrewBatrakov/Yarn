@@ -8,7 +8,8 @@ SOURCES  += \
     $$PWD/journalform.cpp \
     $$PWD/photoform.cpp \
     $$PWD/tegtableform.cpp \
-    $$PWD/tegform.cpp
+    $$PWD/tegform.cpp \
+    $$PWD/journallistform.cpp
 
 HEADERS  += \  
     $$PWD/colorform.h \
@@ -20,4 +21,5 @@ HEADERS  += \
     $$PWD/journalform.h \
     $$PWD/photoform.h \
     $$PWD/tegtableform.h \
-    $$PWD/tegform.h
+    $$PWD/tegform.h \
+    $$PWD/journallistform.h
