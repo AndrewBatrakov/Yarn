@@ -8,6 +8,9 @@ PhotoForm::PhotoForm(QString idJournal, int page, QWidget *parent, bool edit,boo
     journalID = idJournal;
     pageNumber = page;
     photoLabel  = new QLabel;
+    scrollArea = new QScrollArea;
+    scrollArea->setBackgroundRole(QPalette::Dark);
+    //photoLabel->setScaledContents(true);
 
     maxCount();
 
@@ -46,12 +49,16 @@ PhotoForm::PhotoForm(QString idJournal, int page, QWidget *parent, bool edit,boo
     int widI = QPixmap::fromImage(pixMap).width();
     int hei = QApplication::desktop()->height()-100;
     re = pixMap.scaled(widI,hei,Qt::KeepAspectRatio,Qt::SmoothTransformation);
+
     photoLabel->setPixmap(QPixmap::fromImage(re));
     photoLabel->resize(photoLabel->sizeHint());
+    qDebug()<<photoLabel->size();
+    scrollArea->resize(photoLabel->sizeHint());
     this->resize(photoLabel->sizeHint());
 
+    scrollArea->setWidget(photoLabel);
     QVBoxLayout *mainLayout = new QVBoxLayout;
-    mainLayout->addWidget(photoLabel);
+    mainLayout->addWidget(scrollArea);
     if(yesEdit && !readOnly){
         mainLayout->addWidget(pageLabel);
         mainLayout->addWidget(pageEdit);
@@ -60,13 +67,15 @@ PhotoForm::PhotoForm(QString idJournal, int page, QWidget *parent, bool edit,boo
     }
     setLayout(mainLayout);
 
-    setWindowTitle(tr("Pages Of Journal %1").arg(PhotoForm::height()));
+    setWindowTitle(tr("Page Of Journal %1").arg(page));
     exchangeFile.setFileName("exchange.txt");
     if(!exchangeFile.isOpen()){
         exchangeFile.open(QIODevice::ReadWrite);
     }
 
     createContextMenu();
+    scaledFactor = 1.0;
+    photoLabel->setScaledContents(true);
 }
 
 
@@ -97,6 +106,7 @@ void PhotoForm::mousePressEvent(QMouseEvent *mouseEvent)
                 re = pixMap.scaled(widI,hei,Qt::KeepAspectRatio,Qt::SmoothTransformation);
                 photoLabel->setPixmap(QPixmap::fromImage(re));
                 photoLabel->resize(photoLabel->sizeHint());
+                scrollArea->resize(photoLabel->sizeHint());
                 this->resize(photoLabel->sizeHint());
             }
         }
@@ -131,7 +141,20 @@ void PhotoForm::createContextMenu()
     QPixmap pixD(":/edit.png");
     editTagForm->setIcon(pixD);
     connect(editTagForm,SIGNAL(triggered()),this,SLOT(addTag()));
+
+    zoomIn = new QAction(tr("Zoom In"),this);
+    QPixmap pixIn(":/up.png");
+    zoomIn->setIcon(pixIn);
+    connect(zoomIn,SIGNAL(triggered()),this,SLOT(upPictureSlot()));
+
+    zoomOut = new QAction(tr("Zoom Out"),this);
+    QPixmap pixOut(":/down.png");
+    zoomOut->setIcon(pixOut);
+    connect(zoomOut,SIGNAL(triggered()),this,SLOT(downPictureSlot()));
+
+    photoLabel->addAction(zoomIn);
     photoLabel->addAction(editTagForm);
+    photoLabel->addAction(zoomOut);
     photoLabel->setContextMenuPolicy(Qt::ActionsContextMenu);
 }
 
@@ -152,4 +175,37 @@ void PhotoForm::addTag()
     query.next();
     TegTableForm openForm(query.value(0).toString(),queryPh.value(0).toString(),this,false);
     openForm.exec();
+}
+
+void PhotoForm::scaleImage(double factor)
+{
+    scaledFactor *= factor;
+    photoLabel->resize(scaledFactor * photoLabel->pixmap()->size());
+
+    adjustScrollBar(scrollArea->horizontalScrollBar(), factor);
+    adjustScrollBar(scrollArea->verticalScrollBar(), factor);
+
+    zoomIn->setEnabled(scaledFactor < 3.0);
+    zoomOut->setEnabled(scaledFactor > 0.333);
+}
+
+void PhotoForm::adjustScrollBar(QScrollBar *scrollArea, double factor)
+{
+    scrollArea->setValue(int(factor * scrollArea->value()
+                                 + ((factor - 1) * scrollArea->pageStep()/2)));
+}
+
+void PhotoForm::upPictureSlot()
+{
+    scaleImage(1.25);
+}
+
+void PhotoForm::downPictureSlot()
+{
+    scaleImage(0.8);
+}
+
+void PhotoForm::wheelEvent(QWheelEvent *ev)
+{
+    qDebug()<<ev;
 }

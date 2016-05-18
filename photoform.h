@@ -13,11 +13,19 @@ public:
 private slots:
     void maxCount();
     void editRecord();
-    void createContextMenu();
     void addTag();
+
+    void upPictureSlot();
+    void downPictureSlot();
+    void createContextMenu();
+    void scaleImage(double factor);
+    void adjustScrollBar(QScrollBar *scrollBar, double factor);
 
 private:
     QAction *editTagForm;
+    QAction *zoomIn;
+    QAction *zoomOut;
+
     QLabel *pageLabel;
     LineEdit *pageEdit;
     bool yesEdit;
@@ -34,8 +42,12 @@ private:
     //QString journalPhotoID;
     QFile exchangeFile;
 
+    double scaledFactor;
+    QScrollArea *scrollArea;
+
 protected:
     void mousePressEvent(QMouseEvent *);
+    void wheelEvent(QWheelEvent *);
 };
 
 #endif // PHOTOFORM_H
